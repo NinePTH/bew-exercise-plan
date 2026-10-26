@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hourglass Balance — โปรแกรมออกกำลังกายเฉพาะบุคคล</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #fdf8f6;
+            color: #1f2937;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(244, 63, 94, 0.12);
+        }
+        .active-tab {
+            background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
+        }
+        .breathing-circle {
+            transition: all 1s ease-in-out;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fdf8f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fda4af;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+
+    <!-- Header / Profile Banner -->
+    <header class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
+        <div class="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-2">
+                    <i class="ph-fill ph-sparkle text-amber-200"></i>
+                    <span>Inverted Triangle Body Balance</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Hourglass & Core Sculpt</h1>
+                <p class="text-rose-100 text-sm mt-1">แผนปั้นสะโพก กระชับเอวคอด และเฟิร์มไหล่สวย (สำหรับทำที่ห้องพัก & สวน)</p>
+            </div>
+            
+            <!-- User Stats Badges -->
+            <div class="flex flex-wrap gap-2 sm:gap-3 bg-white/15 backdrop-blur-md p-3 rounded-2xl border border-white/20 text-xs sm:text-sm">
+                <div class="px-2.5 py-1 border-r border-white/20">
+                    <span class="block text-rose-100 text-[11px]">ส่วนสูง / น้ำหนัก</span>
+                    <span class="font-semibold">152 ซม. / 50 กก.</span>
+                </div>
+                <div class="px-2.5 py-1 border-r border-white/20">
+                    <span class="block text-rose-100 text-[11px]">เป้าหมาย</span>
+                    <span class="font-semibold">เอวคอด + ปั้นก้น + ไหล่เฟิร์ม</span>
+                </div>
+                <div class="px-2.5 py-1">
+                    <span class="block text-rose-100 text-[11px]">ความถี่</span>
+                    <span class="font-semibold">ยืดหยุ่น 3–5 วัน/สัปดาห์</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 space-y-6">
+
+        <!-- Top Dashboard Row: Weekly Tracker & Equipment -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <!-- Weekly Habit Tracker -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
+                    <div>
+                        <h2 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="ph-fill ph-calendar-check text-rose-500 text-xl"></i>
+                            ตารางแนะนำประจำสัปดาห์ (จันทร์ – อาทิตย์)
+                        </h2>
+                        <p class="text-xs text-gray-500">เลือกจำนวนวันที่คุณสะดวกในสัปดาห์นี้ แล้วคลิกที่วันเพื่อดูท่าฝึกหรือเช็กชื่อ</p>
+                    </div>
+                    <!-- Plan Frequency Selector -->
+                    <div class="flex items-center gap-1 bg-rose-50 p-1 rounded-xl border border-rose-100 self-start">
+                        <button onclick="setWeeklyPlan(3)" id="planBtn-3" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-rose-500 text-white shadow-sm">3 วัน (เริ่มต้น)</button>
+                        <button onclick="setWeeklyPlan(4)" id="planBtn-4" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100">4 วัน (สมดุล)</button>
+                        <button onclick="setWeeklyPlan(5)" id="planBtn-5" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100">5 วัน (ฟิตจัดเต็ม)</button>
+                    </div>
+                </div>
+
+                <!-- 7-Day Interactive Planner Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-7 gap-2 pt-1" id="dayTrackerContainer">
+                    <!-- Rendered by JS -->
+                </div>
+
+                <!-- Today's Recommendation Callout -->
+                <div id="selectedDayBanner" class="mt-3.5 bg-gradient-to-r from-rose-50 via-pink-50 to-amber-50 border border-rose-200/70 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Equipment & Golden Rules Summary -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white to-rose-50/50">
+                <div>
+                    <h2 class="font-bold text-gray-800 flex items-center gap-2 mb-2">
+                        <i class="ph-fill ph-barbell text-rose-500 text-xl"></i>
+                        อุปกรณ์พร้อมลุยในห้องพัก
+                    </h2>
+                    <div class="flex flex-wrap gap-1.5 mb-3">
+                        <span class="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-medium">เคทเทิลเบล</span>
+                        <span class="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-medium">ดัมเบล</span>
+                        <span class="px-2.5 py-1 bg-rose-100 text-rose-700 rounded-lg text-xs font-medium">ยางยืดปั้นก้น</span>
+                        <span class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-lg text-xs font-medium">วิ่งสวน / ฟิตเนส</span>
+                    </div>
+                </div>
+                <div class="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-xs text-rose-900">
+                    <span class="font-semibold block mb-0.5"><i class="ph-bold ph-warning-circle"></i> กฎเหล็กหุ่นสามเหลี่ยมคว่ำ:</span>
+                    เลี่ยงท่าเอียงข้างถ่วงน้ำหนัก (Side Bend) และเน้นน้ำหนักเบา-ปานกลางสำหรับช่วงไหล่เพื่อความเฟิร์มสวยไม่บึกบึน
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Selector (Flexible Time Schedule) -->
+        <section class="glass-card rounded-2xl p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-800">วันนี้คุณมีเวลาว่างแบบไหน?</h2>
+                    <p class="text-xs text-gray-500">เลือกโปรแกรมตามเวลาและพลังงานของคุณในวันนี้ได้เลย</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-200">
+                    <i class="ph-fill ph-check-circle text-base"></i>
+                    <span>ทำเสร็จแล้ววันนี้: <strong id="completedExercisesCount">0</strong> ท่า</span>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-6" id="programTabs">
+                <button onclick="switchTab('lower_sculpt')" id="tab-lower_sculpt" class="active-tab flex flex-col items-start p-3 rounded-xl text-left transition-all">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <i class="ph-fill ph-fire text-lg"></i>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/20">35–40 น.</span>
+                    </div>
+                    <span class="font-semibold text-xs sm:text-sm">ปั้นสะโพกผาย & ขาเรียว</span>
+                </button>
+
+                <button onclick="switchTab('waist_shoulder')" id="tab-waist_shoulder" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <i class="ph-fill ph-spiral text-lg text-rose-500"></i>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–35 น.</span>
+                    </div>
+                    <span class="font-semibold text-xs sm:text-sm">เอวคอด & ไหล่เฟิร์ม</span>
+                </button>
+
+                <button onclick="switchTab('quick_busy')" id="tab-quick_busy" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <i class="ph-fill ph-lightning text-lg text-amber-500"></i>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">15–20 น.</span>
+                    </div>
+                    <span class="font-semibold text-xs sm:text-sm">โหมดวันยุ่ง (Quick)</span>
+                </button>
+
+                <button onclick="switchTab('cardio_burn')" id="tab-cardio_burn" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <i class="ph-fill ph-sneaker-move text-lg text-emerald-500"></i>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–40 น.</span>
+                    </div>
+                    <span class="font-semibold text-xs sm:text-sm">คาร์ดิโอรีดไขมัน</span>
+                </button>
+
+                <button onclick="switchTab('stretching')" id="tab-stretching" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all col-span-2 md:col-span-1">
+                    <div class="flex items-center justify-between w-full mb-1">
+                        <i class="ph-fill ph-heart-straight text-lg text-indigo-500"></i>
+                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-medium">5–10 น.</span>
+                    </div>
+                    <span class="font-semibold text-xs sm:text-sm">ยืดเหยียดลดปวดเมื่อย</span>
+                </button>
+            </div>
+
+            <!-- Program Description Banner -->
+            <div id="programBanner" class="bg-rose-50/80 border border-rose-100 rounded-xl p-4 mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <!-- Filled by JS -->
+            </div>
+
+            <!-- Exercises Grid -->
+            <div id="exerciseList" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Filled by JS -->
+            </div>
+        </section>
+
+        <!-- Interactive Tools Section: Rest Timer & Stomach Vacuum Coach -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Built-in Workout / Rest Timer -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="ph-fill ph-timer text-rose-500 text-xl"></i>
+                            นาฬิกาจับเวลาพักเซต / แพลงก์
+                        </h3>
+                        <span class="text-xs text-gray-400">คลิกเลือกเวลาเพื่อเริ่มทันที</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-4">ช่วยให้การพักระหว่างเซตแม่นยำและคุมเวลาออกกำลังกายได้ตามเป้า</p>
+                </div>
+
+                <div class="flex flex-col items-center justify-center py-4 bg-gray-50 rounded-2xl border border-gray-100 mb-4">
+                    <div id="timerDisplay" class="text-5xl font-bold text-gray-800 tracking-wider font-mono">00:45</div>
+                    <div id="timerStatus" class="text-xs text-rose-500 font-medium mt-1">พร้อมเริ่มจับเวลา</div>
+                </div>
+
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button onclick="setTimer(30)" class="py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-semibold transition">30 วิ</button>
+                    <button onclick="setTimer(45)" class="py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-semibold transition">45 วิ</button>
+                    <button onclick="setTimer(60)" class="py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-semibold transition">60 วิ</button>
+                    <button onclick="setTimer(90)" class="py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-semibold transition">90 วิ</button>
+                </div>
+
+                <div class="flex gap-2">
+                    <button id="startPauseBtn" onclick="toggleTimer()" class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <i class="ph-fill ph-play"></i> เริ่มจับเวลา
+                    </button>
+                    <button onclick="resetTimer()" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium text-sm transition">
+                        รีเซต
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Stomach Vacuum Guide (Waist Cincher) -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                            <i class="ph-fill ph-wind text-amber-500 text-xl"></i>
+                            ตัวช่วยฝึก Stomach Vacuum (ปั้นเอวคอด)
+                        </h3>
+                        <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-medium">แนะนำทำทุกเช้า</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3">บริหารกล้ามเนื้อหน้าท้องมัดลึก (เสมือนใส่คอร์เซ็ตธรรมชาติ) โดยไม่ทำให้เอวหนา</p>
+                </div>
+
+                <div class="flex flex-col items-center justify-center py-5 bg-gradient-to-b from-amber-50/60 to-rose-50/60 rounded-2xl border border-rose-100 mb-4 relative overflow-hidden">
+                    <div id="vacuumCircle" class="w-24 h-24 rounded-full bg-gradient-to-tr from-rose-400 to-amber-300 flex items-center justify-center text-white font-bold text-lg shadow-inner breathing-circle">
+                        <span id="vacuumCount">พร้อม</span>
+                    </div>
+                    <p id="vacuumInstruction" class="text-xs font-medium text-gray-700 mt-3 text-center px-4">
+                        กดปุ่มด้านล่างเพื่อซ้อมจังหวะหายใจและแขม่วหน้าท้อง 15 วินาที
+                    </p>
+                </div>
+
+                <button id="vacuumBtn" onclick="startVacuumSession()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                    <i class="ph-fill ph-play-circle text-lg"></i> เริ่มฝึกแขม่วหน้าท้อง 1 เซต (25 วินาที)
+                </button>
+            </div>
+        </div>
+
+        <!-- Body Type Strategy Guide (Do's & Don'ts) -->
+        <section class="glass-card rounded-2xl p-5 shadow-sm">
+            <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="ph-fill ph-compass text-rose-500 text-xl"></i>
+                สรุปเทคนิคปั้นหุ่นสำหรับรูปร่างสามเหลี่ยมคว่ำ (สูง 152 ซม. / 50 กก.)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4">
+                    <h4 class="font-bold text-emerald-800 flex items-center gap-1.5 mb-2">
+                        <i class="ph-fill ph-check-circle text-emerald-600 text-lg"></i> สิ่งที่ควรเน้น (Do's)
+                    </h4>
+                    <ul class="space-y-2 text-xs text-emerald-900">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>เน้นเพิ่มมิติสะโพกด้านข้างและก้น:</strong> ใช้ยางยืดและเคทเทิลเบลช่วยสร้างความโค้งเว้าช่วงล่าง จะทำให้ช่วงไหล่และสะโพกดูสมดุลเป็นทรงนาฬิกาทราย</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>เน้นแกนกลางลำตัวมัดลึก (Deep Core):</strong> ท่า Deadbug, Plank และ Stomach Vacuum ช่วยดึงหน้าท้องให้แบนราบและเอวดูคอดลง</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>ไหล่หลังและสะบัก (Rear Delt & Back):</strong> ใช้ดัมเบลน้ำหนักเบาเน้นจำนวนครั้ง เพื่อดึงไหล่ที่ห่อให้เปิดออก บุคลิกจะดูเพรียวและสง่าขึ้นทันที</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-rose-50/70 border border-rose-200 rounded-xl p-4">
+                    <h4 class="font-bold text-rose-800 flex items-center gap-1.5 mb-2">
+                        <i class="ph-fill ph-x-circle text-rose-600 text-lg"></i> สิ่งที่ควรหลีกเลี่ยง (Don'ts)
+                    </h4>
+                    <ul class="space-y-2 text-xs text-rose-900">
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>เลี่ยงการเล่นสีข้างด้วยเวทหนัก:</strong> เช่น ท่าถือดัมเบลเอียงตัว (Side Bend) หรือ Russian Twist ถ่วงน้ำหนักเยอะๆ เพราะจะทำให้กล้ามเนื้อเอวด้านข้างหนาขึ้น</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>เลี่ยงการใช้น้ำหนักมากเกินไปในท่าไหล่ข้าง:</strong> ท่ากางแขนยกดัมเบล (Lateral Raise) หากใช้น้ำหนักมากเกินไปอาจเน้นให้ไหล่ดูกว้างขึ้น</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="font-bold">•</span>
+                            <span><strong>อย่าหักโหมในสัปดาห์แรก:</strong> เนื่องจากไม่ได้ออกกำลังกายมานาน แนะนำให้เริ่มจาก 3 วันในสัปดาห์แรกก่อน แล้วค่อยขยับเป็น 4–5 วันเมื่อร่างกายคุ้นเคย</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Weekly Schedule Templates (3, 4, or 5 days/week)
+        const schedulePlans = {
+            3: {
+                name: "แพลน 3 วัน/สัปดาห์ (เหมาะกับช่วง 1–2 สัปดาห์แรกที่เพิ่งกลับมาออกกำลังกาย)",
+                rule: "เน้นเล่นวันเว้นวัน เพื่อให้กล้ามเนื้อสะโพกและต้นขามีเวลาซ่อมแซมและเติบโต",
+                days: [
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
+                    { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-400' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'cardio_burn', label: 'วิ่งสวน / เดินชัน (เสริม)', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                ]
+            },
+            4: {
+                name: "แพลน 4 วัน/สัปดาห์ (สมดุลที่สุดสำหรับปรับหุ่นสามเหลี่ยมคว่ำให้เป็นนาฬิกาทราย)",
+                rule: "ปั้นสะโพก 2 วัน + เอวและไหล่ 1 วัน + คาร์ดิโอรีดไขมัน 1 วัน",
+                days: [
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
+                    { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-400' },
+                    { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'cardio_burn', label: 'วิ่งสวน / เดินชันลู่วิ่ง', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                ]
+            },
+            5: {
+                name: "แพลน 5 วัน/สัปดาห์ (สำหรับสัปดาห์ที่มีเวลาว่างและร่างกายฟื้นตัวไว)",
+                rule: "ผสมวันจัดเต็มกับโหมดด่วน 15 นาที เพื่อกระตุ้นระบบเผาผลาญต่อเนื่องโดยไม่ล้าเกินไป",
+                days: [
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
+                    { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'cardio_burn', label: 'วิ่งสวน / คาร์ดิโอ', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'quick_busy', label: 'โหมดด่วน 15 นาที', icon: 'ph-lightning', color: 'text-amber-500' },
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                ]
+            }
+        };
+
+        let currentPlanFreq = 4; // Default 4 days/week
+        let selectedDayIndex = 0; // Monday default
+        const checkedDaysState = { mon: false, tue: false, wed: false, thu: false, fri: false, sat: false, sun: false };
+
+        // Workout Programs Database
+        const workoutPrograms = {
+            lower_sculpt: {
+                title: "โหมดปั้นสะโพกผาย & ขาเรียวกระชับ (35–40 นาที)",
+                subtitle: "ใช้อุปกรณ์ในห้องพัก: เคทเทิลเบล + ดัมเบล + ยางยืดเพิ่มแรงต้านที่ขา",
+                tag: "แนะนำ 2 วัน/สัปดาห์",
+                exercises: [
+                    {
+                        id: "ex1",
+                        name: "Kettlebell Goblet Squat",
+                        equipment: "เคทเทิลเบล + ยางยืด",
+                        sets: "3–4 เซต x 12–15 ครั้ง",
+                        rest: 60,
+                        steps: "สวมยางยืดเหนือเข่า ยืนแยกเท้ากว้างกว่าไหล่เล็กน้อย ประคองเคทเทิลเบลระดับอก ย่อตัวลงดันสะโพกไปด้านหลังโดยไม่ให้เข่าหุบเข้าหากัน แล้วดันส้นเท้าเกร็งก้นยืนขึ้น",
+                        tip: "การใส่ยางยืดขณะสควอทจะช่วยบังคับให้กล้ามเนื้อก้นด้านข้างทำงานเพิ่มขึ้นเป็น 2 เท่า",
+                        done: false
+                    },
+                    {
+                        id: "ex2",
+                        name: "Banded Dumbbell Glute Bridge",
+                        equipment: "ดัมเบล/เคทเทิลเบล + ยางยืด",
+                        sets: "3–4 เซต x 15 ครั้ง",
+                        rest: 45,
+                        steps: "นอนหงายชันเข่า สวมยางยืดเหนือเข่า วางดัมเบลบนหน้าขา ขมิบก้นดันสะโพกขึ้นสูงสุดแล้วค้างไว้ 2 วินาทีพร้อมกางเข่าต้านยางยืดเล็กน้อย ค่อยๆ ลดตัวลง",
+                        tip: "ท่านี้ปั้นก้นให้กลมสวยโดยไม่ทำให้ต้นขาด้านหน้า (Quads) ใหญ่ขึ้น",
+                        done: false
+                    },
+                    {
+                        id: "ex3",
+                        name: "Banded Lateral Walk",
+                        equipment: "ยางยืดปั้นก้น (Booty Band)",
+                        sets: "3 เซต x ก้าวไป-กลับข้างละ 15 ก้าว",
+                        rest: 45,
+                        steps: "สวมยางยืดเหนือเข่าหรือข้อเท้า ย่อตัวลงท่ากึ่งสควอท ก้าวเท้าออกด้านข้างทีละก้าวโดยรักษาระยะห่างให้ยางยืดตึงตลอดเวลา",
+                        tip: "ช่วยเติมเต็มสะโพกด้านข้าง (Hip Dips) ให้ดูผายรับกับช่วงไหล่ ส่งให้เอวดูคอดลงทันที",
+                        done: false
+                    }
+                ]
+            },
+            waist_shoulder: {
+                title: "โหมดเอวคอด & ไหล่เฟิร์มสวย (30–35 นาที)",
+                subtitle: "ใช้อุปกรณ์ในห้องพัก: ดัมเบลคู่เล็ก + เสื่อออกกำลังกาย",
+                tag: "แนะนำ 1–2 วัน/สัปดาห์",
+                exercises: [
+                    {
+                        id: "ex4",
+                        name: "Core Deadbug",
+                        equipment: "ตัวเปล่า (เสื่อโยคะ)",
+                        sets: "3 เซต x สลับข้าง 14–16 ครั้ง",
+                        rest: 45,
+                        steps: "นอนหงาย ยกแขนชี้เพดาน ยกขาตั้งฉาก 90 องศา กดหลังส่วนล่างให้แนบพื้น หายใจออกพร้อมเหยียดแขนขวาและขาซ้ายลงช้าๆ แล้วดึงกลับสลับข้าง",
+                        tip: "กระชับหน้าท้องส่วนลึกได้ดีเยี่ยมโดยไม่ไปขยายขนาดกล้ามเนื้อสีข้าง",
+                        done: false
+                    },
+                    {
+                        id: "ex5",
+                        name: "Dumbbell Rear Delt Fly",
+                        equipment: "ดัมเบลน้ำหนักเบา",
+                        sets: "3 เซต x 15 ครั้ง",
+                        rest: 45,
+                        steps: "ถือดัมเบล พับสะโพกโน้มตัวไปข้างหน้า 45 องศา หลังตรง กางแขนยกดัมเบลออกด้านข้างโดยโฟกัสที่หัวไหล่ด้านหลังและบีบสะบัก",
+                        tip: "ช่วยให้หัวไหล่เฟิร์มคมชัด แก้ไหล่ห่อ ทำให้ช่วงบนดูเพรียวสง่าโดยไม่ทำให้ไหล่ดูกว้างขึ้น",
+                        done: false
+                    },
+                    {
+                        id: "ex6",
+                        name: "Stomach Vacuum & Plank",
+                        equipment: "ตัวเปล่า",
+                        sets: "3 รอบ (แขม่วท้อง 20 วิ + แพลงก์ 30 วิ)",
+                        rest: 45,
+                        steps: "เริ่มจากเป่าลมออกจนหมดแล้วแขม่วพุงดึงสะดือเข้าหาสันหลังค้างไว้ 20 วินาที พักหายใจครู่หนึ่งแล้วต่อด้วยท่า Forearm Plank เกร็งลำตัวตรงอีก 30 วินาที",
+                        tip: "คอมโบเด็ดสำหรับรัดรอบเอวให้เล็กลงเหมือนมีเข็มขัดธรรมชาติ",
+                        done: false
+                    }
+                ]
+            },
+            quick_busy: {
+                title: "โหมดวันยุ่ง — Quick Sculpt Circuit (15–20 นาที)",
+                subtitle: "ทำต่อเนื่อง 3 ท่า วน 3 รอบในห้องพัก เหมาะกับวันเหนื่อยหรือมีเวลาน้อย",
+                tag: "ตัวช่วยรักษาวินัย",
+                exercises: [
+                    {
+                        id: "ex7",
+                        name: "Kettlebell Swing",
+                        equipment: "เคทเทิลเบล",
+                        sets: "3 รอบ x 15–20 ครั้ง",
+                        rest: 30,
+                        steps: "ยืนแยกเท้ากว้างกว่าไหล่ พับสะโพกไปด้านหลังแล้วใช้แรงส่งจากก้นและสะโพกเหวี่ยงเคทเทิลเบลขึ้นระดับอก เกร็งหน้าท้องและก้นทุกครั้งที่ยืนตรง",
+                        tip: "ท่าเดียวได้ทั้งคาร์ดิโอรีดไขมันเร่งด่วน กระชับก้น และเฟิร์มแผ่นหลัง",
+                        done: false
+                    },
+                    {
+                        id: "ex8",
+                        name: "Banded Squat Pulse",
+                        equipment: "ยางยืดปั้นก้น",
+                        sets: "3 รอบ x 20 ครั้ง",
+                        rest: 30,
+                        steps: "สวมยางยืดเหนือเข่า ย่อตัวลงในท่าสควอทค้างไว้ แล้วขยับขึ้น-ลงสั้นๆ (Pulse) 20 ครั้งโดยกางเข่าต้านยางยืดตลอด",
+                        tip: "ใช้เวลาแค่ไม่ถึงนาทีแต่ปั้นก้นให้ตึงกระชับได้เร็วมาก",
+                        done: false
+                    },
+                    {
+                        id: "ex9",
+                        name: "Forearm Plank Hold",
+                        equipment: "ตัวเปล่า",
+                        sets: "3 รอบ x 35–45 วินาที",
+                        rest: 45,
+                        steps: "ตั้งศอกตรงกับหัวไหล่ เกร็งหน้าท้องดึงสะดือขึ้น ขมิบก้น รักษาแนวลำตัวให้ตรงและหายใจเข้า-ออกสม่ำเสมอ",
+                        tip: "ปิดท้ายวันยุ่งๆ ด้วยการล็อกแกนกลางลำตัวและไหล่ให้เฟิร์ม",
+                        done: false
+                    }
+                ]
+            },
+            cardio_burn: {
+                title: "โหมดคาร์ดิโอรีดไขมัน & หน้าท้องแบน (30–40 นาที)",
+                subtitle: "ออกไปเปลี่ยนบรรยากาศที่สวนสาธารณะหรือลู่วิ่งฟิตเนส",
+                tag: "แนะนำ 1–2 วัน/สัปดาห์",
+                exercises: [
+                    {
+                        id: "ex10",
+                        name: "Run / Walk Intervals (วิ่งสลับเดิน)",
+                        equipment: "สวนสาธารณะ / ลู่วิ่งฟิตเนส",
+                        sets: "25–30 นาที (Zone 2)",
+                        rest: 60,
+                        steps: "เดินเร็ววอร์มอัพ 5 นาที จากนั้นวิ่งเหยาะๆ 3–4 นาที สลับเดินเร็ว 1–2 นาที วนไปจนครบเวลา",
+                        tip: "เหมาะมากสำหรับคนที่ไม่ได้ออกกำลังกายมานาน ช่วยเผาผลาญไขมันรอบเอวโดยไม่ทำให้ร่างกายล้าเกินไป",
+                        done: false
+                    },
+                    {
+                        id: "ex11",
+                        name: "Incline Brisk Walk (ทางเลือกวันไม่อยากวิ่ง)",
+                        equipment: "ลู่วิ่งฟิตเนส (ปรับความชัน)",
+                        sets: "25–30 นาที | ความชัน 6–10%",
+                        rest: 60,
+                        steps: "ปรับความชันลู่วิ่ง 6–10% ความเร็วประมาณ 4.0–4.8 กม./ชม. เดินแกว่งแขนตามธรรมชาติโดยไม่จับราว",
+                        tip: "การเดินชันช่วยเบิร์นไขมันได้ดีพอกับการวิ่ง และช่วยปั้นก้นกับต้นขาด้านหลังไปในตัว",
+                        done: false
+                    },
+                    {
+                        id: "ex12",
+                        name: "Post-Run Core Stretch & Vacuum",
+                        equipment: "ตัวเปล่า",
+                        sets: "5 นาทีหลังคาร์ดิโอ",
+                        rest: 30,
+                        steps: "ยืดเหยียดกล้ามเนื้อน่อง ต้นขาหน้า และสะโพก ท่าละ 30 วินาที ปิดท้ายด้วยฝึกแขม่วหน้าท้อง Stomach Vacuum 3 รอบ",
+                        tip: "การยืดเหยียดหลังวิ่งช่วยให้เรียวขาดูเพรียวสวย ไม่ตึงเป็นก้อน",
+                        done: false
+                    }
+                ]
+            },
+            stretching: {
+                title: "หมวดท่ายืดเหยียดกล้ามเนื้อลดปวดเมื่อยหลังออกกำลังกาย (5–10 นาที)",
+                subtitle: "คลายกล้ามเนื้อ ป้องกันอาการตึง ปั้นขาและสะโพกให้เรียวยาวสวยงาม",
+                tag: "ทำทุกครั้งหลังออกกำลังกายเสร็จ",
+                exercises: [
+                    {
+                        id: "ex13",
+                        name: "Figure-4 Glute Stretch (ยืดสะโพกและก้น)",
+                        equipment: "เสื่อโยคะ",
+                        sets: "ค้างไว้ข้างละ 30–45 วินาที (2 รอบ)",
+                        rest: 30,
+                        steps: "นอนหงายชันเข่า วางข้อเท้าขวาพาดบนเข่าซ้าย สอดมือประสานจับใต้ต้นขาซ้ายแล้วดึงเข้าหาลำตัวจนรู้สึกตึงบริเวณก้นและสะโพกข้างขวา สลับข้าง",
+                        tip: "ช่วยคลายกล้ามเนื้อก้นที่ใช้งานหนักจากการสควอท ป้องกันอาการปวดสะโพกและหลังส่วนล่าง",
+                        done: false
+                    },
+                    {
+                        id: "ex14",
+                        name: "Pigeon Pose (ยืดสะโพกและต้นขาด้านข้าง)",
+                        equipment: "เสื่อโยคะ",
+                        sets: "ค้างไว้ข้างละ 30–45 วินาที",
+                        rest: 30,
+                        steps: "นั่งพับเพียบขาขวามาด้านหน้า เหยียดขาซ้ายตรงไปด้านหลัง ค่อยๆ โน้มตัวไปข้างหน้าจรดหน้าผากแตะพื้นตามความยืดหยุ่น สลับข้าง",
+                        tip: "ท่านี้ช่วยเปิดสะโพกและลดความตึงของสะโพกด้านข้าง ช่วยให้โครงสร้างช่วงล่างดูเพรียวสวย",
+                        done: false
+                    },
+                    {
+                        id: "ex15",
+                        name: "Cat-Cow & Child's Pose (ยืดหลังและแกนกลาง)",
+                        equipment: "เสื่อโยคะ",
+                        sets: "สลับทำ 10 รอบ + ค้างท่าเด็ก 45 วินาที",
+                        rest: 30,
+                        steps: "ตั้งท่าคุกเข่าสี่ขา หายใจเข้าแอ่นหลังเงยหน้า (Cow) หายใจออกโก่งหลังเก็บคาง (Cat) แล้วนั่งทับส้นเท้าเหยียดแขนไปข้างหน้าสุดแรงในท่า Child's Pose",
+                        tip: "ช่วยคลายกล้ามเนื้อหลังส่วนล่างและไหล่หลังจากการทำแพลงก์และบริหารช่วงบน",
+                        done: false
+                    }
+                ]
+            }
+        };
+
+        let currentTab = 'lower_sculpt';
+        let timerInterval = null;
+        let timeRemaining = 45;
+        let isTimerRunning = false;
+
+        function setWeeklyPlan(freq) {
+            currentPlanFreq = freq;
+            [3, 4, 5].forEach(num => {
+                const btn = document.getElementById(`planBtn-${num}`);
+                if (num === freq) {
+                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-rose-500 text-white shadow-sm";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100";
+                }
+            });
+            renderDayTracker();
+        }
+
+        // Render Day Tracker & Schedule
+        function renderDayTracker() {
+            const container = document.getElementById('dayTrackerContainer');
+            container.innerHTML = '';
+            const plan = schedulePlans[currentPlanFreq];
+
+            plan.days.forEach((day, index) => {
+                const isChecked = checkedDaysState[day.id];
+                const isSelected = index === selectedDayIndex;
+                const card = document.createElement('div');
+                card.className = `flex flex-col justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                    isSelected ? 'ring-2 ring-rose-400 bg-rose-50/60 border-rose-300' : 'bg-white hover:bg-rose-50/30 border-gray-200'
+                }`;
+                card.onclick = () => selectDay(index);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-bold text-gray-700">${day.short}</span>
+                        <button onclick="event.stopPropagation(); toggleDayCheck('${day.id}')" title="คลิกเพื่อเช็กชื่อว่าทำเสร็จแล้ว" class="w-5 h-5 rounded-full flex items-center justify-center transition ${
+                            isChecked ? 'bg-emerald-500 text-white shadow-sm' : 'bg-gray-100 hover:bg-rose-100 text-gray-400'
+                        }">
+                            <i class="ph-bold ph-check text-[10px]"></i>
+                        </button>
+                    </div>
+                    <div class="my-1">
+                        <i class="ph-fill ${day.icon} ${day.color} text-base"></i>
+                        <p class="text-[11px] font-semibold text-gray-800 leading-tight mt-0.5">${day.label}</p>
+                    </div>
+                    <span class="text-[10px] ${day.mode === 'rest' ? 'text-gray-400' : 'text-rose-500 font-medium'}">
+                        ${isChecked ? '✓ เช็กชื่อแล้ว' : (day.mode === 'rest' ? 'วันพัก' : 'คลิกดูท่าฝึก')}
+                    </span>
+                `;
+                container.appendChild(card);
+            });
+
+            renderSelectedDayBanner();
+        }
+
+        function selectDay(index) {
+            selectedDayIndex = index;
+            const day = schedulePlans[currentPlanFreq].days[index];
+            if (day.mode !== 'rest') {
+                switchTab(day.mode);
+            }
+            renderDayTracker();
+        }
+
+        function toggleDayCheck(dayId) {
+            checkedDaysState[dayId] = !checkedDaysState[dayId];
+            renderDayTracker();
+        }
+
+        function renderSelectedDayBanner() {
+            const plan = schedulePlans[currentPlanFreq];
+            const day = plan.days[selectedDayIndex];
+            const banner = document.getElementById('selectedDayBanner');
+
+            if (day.mode === 'rest') {
+                banner.innerHTML = `
+                    <div>
+                        <span class="font-bold text-gray-800"><i class="ph-fill ph-sparkle text-amber-500"></i> วัน${day.name}: วันพักฟื้นฟูกล้ามเนื้อ (Active Recovery)</span>
+                        <p class="text-gray-600 mt-0.5">วันนี้ไม่ต้องเวทหนัก! แนะนำให้ฝึกแค่ <strong>Stomach Vacuum (แขม่วหน้าท้อง) 3 รอบตอนเช้า</strong> และเดินเล่นยืดเหยียดเบาๆ เพื่อให้กล้ามเนื้อก้นและต้นขาซ่อมแซมตัวเอง</p>
+                    </div>
+                    <button onclick="document.getElementById('vacuumBtn').scrollIntoView({behavior: 'smooth'})" class="px-3 py-1.5 bg-amber-500 text-white rounded-lg font-medium shrink-0 hover:bg-amber-600 transition">
+                        ไปที่ตัวช่วยฝึกแขม่วท้อง
+                    </button>
+                `;
+            } else {
+                banner.innerHTML = `
+                    <div>
+                        <span class="font-bold text-rose-900"><i class="ph-fill ph-calendar-star text-rose-500"></i> แผนของวัน${day.name}: ${day.label}</span>
+                        <p class="text-rose-700 mt-0.5">${plan.rule} — <em>หากวันนี้ยุ่งหรือเหนื่อย สามารถสลับไปกดแท็บ <strong>"โหมดวันยุ่ง (15–20 นาที)"</strong> แทนได้เลย!</em></p>
+                    </div>
+                    <button onclick="switchTab('quick_busy')" class="px-3 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-lg font-semibold shrink-0 hover:bg-rose-100 transition">
+                        สลับเป็นโหมดวันยุ่ง 15 นาที
+                    </button>
+                `;
+            }
+        }
+
+        // Switch Workout Tab
+        function switchTab(tabKey) {
+            currentTab = tabKey;
+            const allTabs = ['lower_sculpt', 'waist_shoulder', 'quick_busy', 'cardio_burn', 'stretching'];
+            allTabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabKey) {
+                    btn.className = "active-tab flex flex-col items-start p-3.5 rounded-xl text-left transition-all";
+                } else {
+                    btn.className = "bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3.5 rounded-xl text-left transition-all";
+                }
+            });
+            renderExercises();
+        }
+
+        // Render Exercises for Current Tab
+        function renderExercises() {
+            const program = workoutPrograms[currentTab];
+            const banner = document.getElementById('programBanner');
+            banner.innerHTML = `
+                <div>
+                    <h3 class="font-bold text-rose-900 text-base">${program.title}</h3>
+                    <p class="text-xs text-rose-700 mt-0.5">${program.subtitle}</p>
+                </div>
+                <span class="self-start sm:self-center px-3 py-1 bg-white text-rose-600 border border-rose-200 rounded-full text-xs font-semibold shadow-sm shrink-0">
+                    ${program.tag}
+                </span>
+            `;
+
+            const list = document.getElementById('exerciseList');
+            list.innerHTML = '';
+
+            program.exercises.forEach((ex) => {
+                const card = document.createElement('div');
+                card.className = `rounded-2xl p-4 border transition-all flex flex-col justify-between ${
+                    ex.done 
+                    ? 'bg-emerald-50/40 border-emerald-200' 
+                    : 'bg-white border-gray-100 shadow-sm hover:border-rose-200'
+                }`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 border border-rose-100">
+                                ${ex.equipment}
+                            </span>
+                            <button onclick="setTimer(${ex.rest})" class="text-[11px] text-gray-500 hover:text-rose-600 flex items-center gap-1 bg-gray-100 hover:bg-rose-50 px-2 py-0.5 rounded-md transition" title="ตั้งเวลาพัก">
+                                <i class="ph-bold ph-timer"></i> พัก ${ex.rest} วิ
+                            </button>
+                        </div>
+
+                        <h4 class="font-bold text-gray-800 text-base mb-1 ${ex.done ? 'line-through text-gray-400' : ''}">${ex.name}</h4>
+                        <div class="text-xs font-semibold text-rose-500 mb-3">${ex.sets}</div>
+
+                        <p class="text-xs text-gray-600 leading-relaxed mb-3">
+                            ${ex.steps}
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="bg-amber-50/70 border border-amber-200/70 rounded-xl p-2.5 text-[11px] text-amber-900 mb-3">
+                            <strong class="block text-amber-800 mb-0.5"><i class="ph-fill ph-lightbulb"></i> เคล็ดลับหุ่นสวย:</strong>
+                            ${ex.tip}
+                        </div>
+
+                        <button onclick="toggleExerciseDone('${ex.id}')" class="w-full py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
+                            ex.done 
+                            ? 'bg-emerald-500 text-white shadow-sm' 
+                            : 'bg-gray-100 hover:bg-rose-500 hover:text-white text-gray-700'
+                        }">
+                            <i class="ph-bold ${ex.done ? 'ph-check-circle' : 'ph-circle'} text-sm"></i>
+                            ${ex.done ? 'ทำท่านี้เสร็จแล้ว!' : 'ทำเสร็จแล้ว คลิกเช็กชื่อ'}
+                        </button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+
+            updateTotalCompletedCount();
+        }
+
+        function toggleExerciseDone(exId) {
+            const program = workoutPrograms[currentTab];
+            const target = program.exercises.find(e => e.id === exId);
+            if (target) {
+                target.done = !target.done;
+                renderExercises();
+            }
+        }
+
+        function updateTotalCompletedCount() {
+            let total = 0;
+            Object.values(workoutPrograms).forEach(prog => {
+                prog.exercises.forEach(ex => {
+                    if (ex.done) total++;
+                });
+            });
+            document.getElementById('completedExercisesCount').innerText = total;
+        }
+
+        // Rest Timer Logic
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, '0');
+            const s = (sec % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function setTimer(seconds) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timeRemaining = seconds;
+            document.getElementById('timerDisplay').innerText = formatTime(timeRemaining);
+            document.getElementById('timerStatus').innerText = `ตั้งเวลาไว้ที่ ${seconds} วินาที`;
+            updateTimerButtonUI();
+        }
+
+        function toggleTimer() {
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                document.getElementById('timerStatus').innerText = 'หยุดชั่วคราว';
+            } else {
+                if (timeRemaining <= 0) timeRemaining = 45;
+                isTimerRunning = true;
+                document.getElementById('timerStatus').innerText = 'กำลังจับเวลา... หายใจเข้า-ออกลึกๆ';
+                timerInterval = setInterval(() => {
+                    timeRemaining--;
+                    document.getElementById('timerDisplay').innerText = formatTime(timeRemaining);
+                    if (timeRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        isTimerRunning = false;
+                        document.getElementById('timerStatus').innerText = 'ครบเวลาแล้ว! ลุยเซตต่อไปได้เลย';
+                        updateTimerButtonUI();
+                    }
+                }, 1000);
+            }
+            updateTimerButtonUI();
+        }
+
+        function resetTimer() {
+            setTimer(45);
+        }
+
+        function updateTimerButtonUI() {
+            const btn = document.getElementById('startPauseBtn');
+            if (isTimerRunning) {
+                btn.innerHTML = `<i class="ph-fill ph-pause"></i> หยุดชั่วคราว`;
+                btn.className = "flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
+            } else {
+                btn.innerHTML = `<i class="ph-fill ph-play"></i> เริ่มจับเวลา`;
+                btn.className = "flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
+            }
+        }
+
+        // Stomach Vacuum Interactive Guide
+        let vacuumInterval = null;
+        function startVacuumSession() {
+            if (vacuumInterval) clearInterval(vacuumInterval);
+            const circle = document.getElementById('vacuumCircle');
+            const countText = document.getElementById('vacuumCount');
+            const instruction = document.getElementById('vacuumInstruction');
+            const btn = document.getElementById('vacuumBtn');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-60');
+
+            // Step 1: Inhale (4s)
+            let step = 1;
+            let counter = 4;
+            circle.style.transform = 'scale(1.25)';
+            countText.innerText = `${counter}s`;
+            instruction.innerText = '1. หายใจเข้าลึกๆ ทางจมูก...';
+
+            vacuumInterval = setInterval(() => {
+                counter--;
+                if (counter > 0) {
+                    countText.innerText = `${counter}s`;
+                } else {
+                    if (step === 1) {
+                        // Step 2: Exhale completely (5s)
+                        step = 2;
+                        counter = 5;
+                        circle.style.transform = 'scale(0.85)';
+                        countText.innerText = `${counter}s`;
+                        instruction.innerText = '2. เป่าลมออกทางปากให้หมดปอด...';
+                    } else if (step === 2) {
+                        // Step 3: Vacuum Hold (15s)
+                        step = 3;
+                        counter = 15;
+                        circle.style.transform = 'scale(0.65)';
+                        countText.innerText = `${counter}s`;
+                        instruction.innerText = '3. ดึงสะดือเข้าหาสันหลัง! แขม่วค้างไว้ (จิบลมหายใจตื้นๆ ได้)';
+                    } else {
+                        // Done
+                        clearInterval(vacuumInterval);
+                        circle.style.transform = 'scale(1)';
+                        countText.innerText = 'สำเร็จ!';
+                        instruction.innerText = 'เก่งมาก! พักหายใจปกติ 30 วินาที แล้วทำซ้ำอีก 2–3 รอบ';
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-60');
+                    }
+                }
+            }, 1000);
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            setWeeklyPlan(4);
+            renderExercises();
+        };
+    </script>
+</body>
+</html>
