@@ -26,7 +26,64 @@ test.beforeEach(async ({ page }) => {
     await page.goto('/index.html');
 });
 
+test.describe('section navigation', () => {
+    // Uses rendered display, not the `hidden` property: utility classes like `grid` can override [hidden].
+    const visiblePanels = page => page.evaluate(() =>
+        [...new Set([...document.querySelectorAll('[data-panel]')]
+            .filter(el => getComputedStyle(el).display !== 'none')
+            .map(el => el.dataset.panel))]);
+
+    test('opens on the workout section by default', async ({ page }) => {
+        expect(await visiblePanels(page)).toEqual(['workout']);
+        await expect(page.locator('[data-nav=workout]')).toHaveAttribute('aria-current', 'page');
+        await expect(page.locator('#measureSection')).toBeHidden();
+    });
+
+    test('tapping a tab shows only that section and updates the URL', async ({ page }) => {
+        await page.click('[data-nav=progress]');
+        expect(await visiblePanels(page)).toEqual(['progress']);
+        await expect(page).toHaveURL(/#progress$/);
+        await expect(page.locator('[data-nav=progress]')).toHaveAttribute('aria-current', 'page');
+        await expect(page.locator('[data-nav=workout]')).not.toHaveAttribute('aria-current', 'page');
+
+        await page.click('[data-nav=nutrition]');
+        expect(await visiblePanels(page)).toEqual(['nutrition']);
+        await expect(page.locator('#proteinResult')).toBeVisible();
+    });
+
+    test('a direct #progress link opens that section, and survives reload', async ({ page }) => {
+        await page.goto('/index.html#progress');
+        await expect(page.locator('#measureSection')).toBeVisible();
+        await page.reload();
+        await expect(page.locator('#measureSection')).toBeVisible();
+    });
+
+    test('an unknown hash falls back to workout', async ({ page }) => {
+        await page.goto('/index.html#nonsense');
+        expect(await visiblePanels(page)).toEqual(['workout']);
+    });
+
+    test('back button returns to the previous section', async ({ page }) => {
+        await page.click('[data-nav=nutrition]');
+        await page.goBack();
+        await expect(page.locator('[data-nav=workout]')).toHaveAttribute('aria-current', 'page');
+    });
+
+    test('the workout timer keeps running while on another tab', async ({ page }) => {
+        await page.evaluate(() => { setTimer(30); toggleTimer(); });
+        await page.click('[data-nav=progress]');
+        await page.waitForTimeout(2200);
+        await page.click('[data-nav=workout]');
+        const text = await page.locator('#timerDisplay').innerText();
+        expect(text).not.toBe('00:30');
+    });
+});
+
 test.describe('measurement tracker', () => {
+    test.beforeEach(async ({ page }) => {
+        await page.goto('/index.html#progress');
+    });
+
     test('saves an entry and restores it after reload', async ({ page }) => {
         await fillEntry(page, { weight: 50.2, waist: 68, hip: 92, note: 'เริ่มต้นโปรแกรม' });
         await expect(page.locator('#measureRows tr')).toHaveCount(1);
@@ -83,11 +140,13 @@ test.describe('protein calculator', () => {
     });
 
     test('updates when the weight changes', async ({ page }) => {
+        await page.click('[data-nav=nutrition]');
         await page.fill('#proteinWeight', '60');
         await expect(page.locator('#proteinResult')).toHaveText('72 – 90 กรัม');
     });
 
     test('follows the latest recorded weight', async ({ page }) => {
+        await page.click('[data-nav=progress]');
         await fillEntry(page, { weight: 55 });
         await expect(page.locator('#proteinResult')).toHaveText('66 – 83 กรัม');
     });

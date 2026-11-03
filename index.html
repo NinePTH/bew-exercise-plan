@@ -18,6 +18,10 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(244, 63, 94, 0.12);
         }
+        /* Tailwind's display utilities (grid, flex) beat the [hidden] attribute, so enforce it for panels. */
+        [data-panel][hidden] {
+            display: none !important;
+        }
         .active-tab {
             background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
             color: white;
@@ -40,7 +44,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen pb-16">
+<body class="min-h-screen pb-28 md:pb-16">
 
     <!-- Header / Profile Banner -->
     <header class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
@@ -75,8 +79,21 @@
     <!-- Main Container -->
     <main class="max-w-5xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 space-y-6">
 
+        <!-- Section navigation: fixed bottom bar on phones, sticky bar under the header on larger screens -->
+        <nav aria-label="เมนูหลัก" class="fixed bottom-0 inset-x-0 z-30 md:sticky md:top-2 md:inset-x-auto bg-white/95 backdrop-blur border-t border-rose-100 md:border md:rounded-2xl md:shadow-sm px-2 py-2 grid grid-cols-3 gap-2" id="sectionNav">
+            <a href="#workout" data-nav="workout" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 py-2 rounded-xl text-xs md:text-sm font-semibold transition">
+                <i class="ph-fill ph-barbell text-xl md:text-lg"></i><span>ออกกำลังกาย</span>
+            </a>
+            <a href="#progress" data-nav="progress" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 py-2 rounded-xl text-xs md:text-sm font-semibold transition">
+                <i class="ph-fill ph-ruler text-xl md:text-lg"></i><span>ความคืบหน้า</span>
+            </a>
+            <a href="#nutrition" data-nav="nutrition" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 py-2 rounded-xl text-xs md:text-sm font-semibold transition">
+                <i class="ph-fill ph-bowl-food text-xl md:text-lg"></i><span>โภชนาการ & เทคนิค</span>
+            </a>
+        </nav>
+
         <!-- Top Dashboard Row: Weekly Tracker & Equipment -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div data-panel="workout" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <!-- Weekly Habit Tracker -->
             <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
@@ -128,7 +145,7 @@
         </div>
 
         <!-- Mode Selector (Flexible Time Schedule) -->
-        <section class="glass-card rounded-2xl p-5 shadow-sm">
+        <section data-panel="workout" class="glass-card rounded-2xl p-5 shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                     <h2 class="text-lg font-bold text-gray-800">วันนี้คุณมีเวลาว่างแบบไหน?</h2>
@@ -195,7 +212,7 @@
         </section>
 
         <!-- Interactive Tools Section: Rest Timer & Stomach Vacuum Coach -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div data-panel="workout" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
             <!-- Built-in Workout / Rest Timer -->
             <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
@@ -261,7 +278,7 @@
         </div>
 
         <!-- Body Type Strategy Guide (Do's & Don'ts) -->
-        <section class="glass-card rounded-2xl p-5 shadow-sm">
+        <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden>
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <i class="ph-fill ph-compass text-rose-500 text-xl"></i>
                 สรุปเทคนิคปั้นหุ่นสำหรับรูปร่างสามเหลี่ยมคว่ำ (สูง 152 ซม. / 50 กก.)
@@ -310,7 +327,7 @@
         </section>
 
         <!-- Body Measurement Tracker -->
-        <section class="glass-card rounded-2xl p-5 shadow-sm" id="measureSection">
+        <section data-panel="progress" class="glass-card rounded-2xl p-5 shadow-sm" id="measureSection" hidden>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
                     <i class="ph-fill ph-ruler text-rose-500 text-xl"></i>
@@ -370,7 +387,7 @@
         </section>
 
         <!-- Nutrition & Protein Guide -->
-        <section class="glass-card rounded-2xl p-5 shadow-sm">
+        <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden>
             <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
                 <i class="ph-fill ph-bowl-food text-amber-500 text-xl"></i>
                 แนวทางโภชนาการและโปรตีน (Nutrition & Protein Guide)
@@ -1142,8 +1159,32 @@
             out.textContent = `${Math.round(w * 1.2)} – ${Math.round(w * 1.5)} กรัม`;
         }
 
+        // ---------- Section navigation (#workout / #progress / #nutrition) ----------
+        const SECTIONS = ['workout', 'progress', 'nutrition'];
+        const NAV_ACTIVE = 'active-tab';
+        const NAV_IDLE = 'text-gray-600 hover:bg-rose-50';
+
+        function showSection(name) {
+            if (!SECTIONS.includes(name)) name = 'workout';
+            document.querySelectorAll('[data-panel]').forEach(el => { el.hidden = el.dataset.panel !== name; });
+            document.querySelectorAll('[data-nav]').forEach(a => {
+                const active = a.dataset.nav === name;
+                a.classList.toggle(NAV_ACTIVE, active);
+                NAV_IDLE.split(' ').forEach(c => a.classList.toggle(c, !active));
+                if (active) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+            });
+        }
+
+        function showSectionFromHash(scrollTop) {
+            showSection(location.hash.slice(1));
+            if (scrollTop) window.scrollTo(0, 0);
+        }
+
+        window.addEventListener('hashchange', () => showSectionFromHash(true));
+
         // Initialize App on Load
         window.onload = function() {
+            showSectionFromHash(false);
             loadProgress();
             measurements = storageGet(STORAGE_KEYS.measurements, []);
             if (!Array.isArray(measurements)) measurements = [];
