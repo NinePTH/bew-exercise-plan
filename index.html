@@ -504,6 +504,8 @@
 
     </main>
 
+    <!-- Pure logic (dates, streaks, import, calendar file); unit-tested in tests/unit -->
+    <script src="core.js"></script>
     <script>
         // Weekly Schedule Templates (3, 4, or 5 days/week)
         const schedulePlans = {
@@ -972,13 +974,6 @@
             document.getElementById('completedExercisesCount').innerText = total;
         }
 
-        // Rest Timer Logic
-        function formatTime(sec) {
-            const m = Math.floor(sec / 60).toString().padStart(2, '0');
-            const s = (sec % 60).toString().padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
         function setTimer(seconds) {
             clearInterval(timerInterval);
             isTimerRunning = false;
@@ -1105,31 +1100,6 @@
             }
         }
 
-        function localDateStr(d = new Date()) {
-            const p = n => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-        }
-
-        function mondayOfWeekStr(d = new Date()) {
-            const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-            m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
-            return localDateStr(m);
-        }
-
-        function isValidIsoDate(s) {
-            if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
-            const d = new Date(s + 'T00:00:00');
-            return !isNaN(d) && localDateStr(d) === s;
-        }
-
-        const DAY_IDS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-
-        // The 7 calendar dates (Mon..Sun) of the week containing `ref`.
-        function weekDates(ref = new Date()) {
-            const [y, m, d] = mondayOfWeekStr(ref).split('-').map(Number);
-            return DAY_IDS.map((_, i) => localDateStr(new Date(y, m - 1, d + i)));
-        }
-
         // ---------- Check-in history (one entry per calendar date trained) ----------
         let checkinDates = new Set();
 
@@ -1153,14 +1123,7 @@
 
         // Keeps only valid past-or-today dates and known exercise ids.
         function cleanExerciseLog(raw) {
-            const out = {}, today = localDateStr();
-            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
-            for (const [date, ids] of Object.entries(raw)) {
-                if (!isValidIsoDate(date) || date > today || !Array.isArray(ids)) continue;
-                const known = [...new Set(ids.filter(id => typeof id === 'string' && EXERCISES_BY_ID[id]))];
-                if (known.length) out[date] = known;
-            }
-            return out;
+            return cleanLogEntries(raw, id => !!EXERCISES_BY_ID[id]);
         }
 
         function saveExerciseLog() {
@@ -1227,18 +1190,11 @@
         const HISTORY_WEEKS = 8;
 
         function weekCount(dates) {
-            return dates.filter(d => checkinDates.has(d)).length;
+            return countIn(checkinDates, dates);
         }
 
         function computeStreak() {
-            const now = new Date();
-            const shift = w => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7 * w);
-            let streak = 0, w = 0;
-            // The current week is still in progress, so it only adds to the streak once it qualifies.
-            if (weekCount(weekDates(shift(0))) >= STREAK_MIN_DAYS) streak++;
-            w = 1;
-            while (weekCount(weekDates(shift(w))) >= STREAK_MIN_DAYS) { streak++; w++; }
-            return streak;
+            return streakWeeks(checkinDates, new Date(), STREAK_MIN_DAYS);
         }
 
         function renderCheckinStats() {
@@ -1312,10 +1268,6 @@
         // ---------- Body Measurement Tracker ----------
         let measurements = [];
 
-        function escapeHtml(s) {
-            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        }
-
         function numOrNull(id) {
             const v = parseFloat(document.getElementById(id).value);
             return Number.isFinite(v) ? v : null;
@@ -1377,8 +1329,6 @@
             lastDeleted = null;
             renderMeasurements();
         }
-
-        function fmt(v) { return v === null || v === undefined ? '–' : (Math.round(v * 10) / 10).toString(); }
 
         // judge=false for measures where neither direction is "bad" (hips: the goal is to keep or build them).
         function deltaChip(label, first, last, unit, judge = true) {
@@ -1464,10 +1414,6 @@
             URL.revokeObjectURL(a.href);
         }
 
-        function newId() {
-            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-        }
-
         // ---------- Trend charts (inline SVG, one small chart per measure, each on its own scale) ----------
         // Series colours are fixed per measure (categorical slots 1-3, defined per theme in src/tailwind.css).
         const CHART_METRICS = [
@@ -1477,16 +1423,6 @@
         ];
         const CHART_W = 300, CHART_H = 150;
         const CHART_M = { l: 34, r: 40, t: 12, b: 24 };
-
-        function niceStep(range) {
-            const target = range / 3;
-            for (const s of [0.5, 1, 2, 5, 10, 20]) if (s >= target) return s;
-            return 50;
-        }
-
-        function shortDate(iso) {
-            return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
-        }
 
         function buildChart(metric, sorted) {
             const pts = sorted.filter(m => m[metric.key] !== null).map(m => ({
@@ -1585,53 +1521,6 @@
             };
             downloadText(`hourglass-backup-${localDateStr()}.json`, 'application/json', JSON.stringify(payload, null, 2));
             setBackupMsg(`สำรองข้อมูล ${measurements.length} รายการ · เช็กชื่อ ${checkinDates.size} วัน แล้ว`, false);
-        }
-
-        // Minimal CSV parser: quoted fields, "" escapes, CRLF/LF, optional BOM.
-        function parseCsv(text) {
-            const rows = [];
-            let row = [], field = '', inQuotes = false;
-            text = text.replace(/^﻿/, '');
-            for (let i = 0; i < text.length; i++) {
-                const c = text[i];
-                if (inQuotes) {
-                    if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
-                    else if (c === '"') inQuotes = false;
-                    else field += c;
-                } else if (c === '"') inQuotes = true;
-                else if (c === ',') { row.push(field); field = ''; }
-                else if (c === '\n' || c === '\r') {
-                    if (c === '\r' && text[i + 1] === '\n') i++;
-                    row.push(field); field = '';
-                    if (row.some(f => f !== '')) rows.push(row);
-                    row = [];
-                } else field += c;
-            }
-            row.push(field);
-            if (row.some(f => f !== '')) rows.push(row);
-            return rows;
-        }
-
-        // Returns a clean entry, or null if the record is unusable.
-        function sanitizeEntry(raw) {
-            if (!raw || typeof raw !== 'object') return null;
-            const date = typeof raw.date === 'string' ? raw.date.trim() : '';
-            if (!isValidIsoDate(date)) return null;
-
-            const num = (v, min, max) => {
-                if (v === null || v === undefined || v === '') return null;
-                const n = Number(v);
-                return Number.isFinite(n) && n >= min && n <= max ? n : undefined; // undefined = invalid
-            };
-            const weight = num(raw.weight, 20, 300), waist = num(raw.waist, 20, 250), hip = num(raw.hip, 20, 250);
-            if (weight === undefined || waist === undefined || hip === undefined) return null;
-            if (weight === null && waist === null && hip === null) return null;
-
-            return {
-                id: typeof raw.id === 'string' && /^[\w-]{1,32}$/.test(raw.id) ? raw.id : newId(),
-                date, weight, waist, hip,
-                note: typeof raw.note === 'string' ? raw.note.trim().slice(0, 120) : ''
-            };
         }
 
         function recordsFromImport(name, text) {
@@ -1777,13 +1666,11 @@
         // measurement is 7+ days old, and a repeating calendar event (.ics) that the phone's calendar alerts on.
         const REMINDER_DUE_DAYS = 7;
         const SNOOZE_KEY = 'hg.reminderSnooze';
-        const ICS_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
 
         function daysSinceLastMeasurement() {
             if (!measurements.length) return null;
             const last = measurements.reduce((a, m) => (m.date > a ? m.date : a), measurements[0].date);
-            const [y, mo, d] = last.split('-').map(Number), now = new Date();
-            return Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(y, mo - 1, d)) / 86400000);
+            return daysBetween(last);
         }
 
         function renderReminderBanner() {
@@ -1823,60 +1710,10 @@
             storageSet(STORAGE_KEYS.reminder, { day, time: /^([01]\d|2[0-3]):[0-5]\d$/.test(raw) ? raw : '07:00' });
         }
 
-        // iCalendar text: escape special characters, fold lines at 75 bytes without splitting a Thai character.
-        function icsText(s) {
-            return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
-        }
-
-        function icsFold(line) {
-            const enc = new TextEncoder(), parts = [];
-            let cur = '', bytes = 0;
-            for (const ch of line) {
-                const b = enc.encode(ch).length;
-                if (bytes + b > 75) { parts.push(cur); cur = ' ' + ch; bytes = 1 + b; }
-                else { cur += ch; bytes += b; }
-            }
-            parts.push(cur);
-            return parts.join('\r\n');
-        }
-
-        // Next date (today or later) on the chosen weekday at the chosen time.
-        function nextReminderStart(dayIdx, time, now = new Date()) {
-            const [h, m] = time.split(':').map(Number);
-            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-            let add = (dayIdx - (now.getDay() + 6) % 7 + 7) % 7;
-            if (add === 0 && start <= now) add = 7;
-            start.setDate(start.getDate() + add);
-            return start;
-        }
-
-        function buildReminderIcs({ day, time }, now = new Date()) {
-            const p = n => String(n).padStart(2, '0');
-            const start = nextReminderStart(day, time, now);
-            const local = `${start.getFullYear()}${p(start.getMonth() + 1)}${p(start.getDate())}T${p(start.getHours())}${p(start.getMinutes())}00`;
-            const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-            const appUrl = new URL('index.html#progress', location.href).href;
-            const lines = [
-                'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hourglass Balance//Measurement reminder//TH', 'CALSCALE:GREGORIAN',
-                'BEGIN:VEVENT',
-                'UID:hourglass-measure-weekly@ninepth.github.io',
-                `DTSTAMP:${stamp}`,
-                `DTSTART:${local}`, // floating time: the phone's own time zone
-                'DURATION:PT10M',
-                `RRULE:FREQ=WEEKLY;BYDAY=${ICS_DAYS[day]}`,
-                `SUMMARY:${icsText('วัดสัดส่วน (เอว / สะโพก / น้ำหนัก)')}`,
-                `DESCRIPTION:${icsText('เปิด Hourglass Balance แล้วบันทึกที่แท็บความคืบหน้า\n' + appUrl)}`,
-                `URL:${appUrl}`,
-                'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText('ถึงเวลาวัดสัดส่วนแล้ว')}`, 'TRIGGER:PT0M', 'END:VALARM',
-                'END:VEVENT', 'END:VCALENDAR'
-            ];
-            return lines.map(icsFold).join('\r\n') + '\r\n';
-        }
-
         function downloadReminderIcs() {
             saveReminderSettings();
             const settings = readReminderSettings();
-            downloadText('hourglass-measure-reminder.ics', 'text/calendar;charset=utf-8', buildReminderIcs(settings));
+            downloadText('hourglass-measure-reminder.ics', 'text/calendar;charset=utf-8', buildReminderIcs(settings, new Date(), new URL('index.html#progress', location.href).href));
             const dayName = document.getElementById('remDay').selectedOptions[0].textContent;
             document.getElementById('reminderMsg').textContent = `ดาวน์โหลดแล้ว: เตือนทุกวัน${dayName} เวลา ${settings.time} น. เปิดไฟล์เพื่อเพิ่มลงปฏิทิน`;
         }

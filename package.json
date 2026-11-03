@@ -3,8 +3,11 @@
   "private": true,
   "scripts": {
     "build:css": "tailwindcss -c tailwind.config.js -i src/tailwind.css -o styles.css --minify",
+    "test:unit": "node --test \"tests/unit/*.test.js\"",
+    "test:functional": "npm run build:css && playwright test tests/functional",
+    "test:e2e": "npm run build:css && playwright test tests/e2e",
     "pretest": "npm run build:css",
-    "test": "playwright test"
+    "test": "npm run test:unit && playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",

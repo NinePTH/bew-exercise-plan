@@ -1,0 +1,21 @@
+#!/bin/sh
+# Runs the tests before every push; any failure cancels the push.
+# Enable once per clone:  git config core.hooksPath .githooks
+# Skip in an emergency:   git push --no-verify
+
+echo "pre-push: running tests (about a minute)..."
+
+# `npm test` rebuilds styles.css first, then runs Playwright.
+if ! npm test --silent -- --reporter=line; then
+    echo "pre-push: tests failed, push cancelled."
+    exit 1
+fi
+
+# The rebuild above must not have changed styles.css; if it did, the commit is missing it.
+if ! git diff --quiet -- styles.css; then
+    echo "pre-push: styles.css was out of date and has been rebuilt."
+    echo "          Commit it (git add styles.css && git commit), then push again."
+    exit 1
+fi
+
+echo "pre-push: all tests passed."

@@ -1,9 +1,10 @@
 // Offline support. Bump CACHE when the precache list changes.
-const CACHE = 'hg-v3';
+const CACHE = 'hg-v4';
 const PRECACHE = [
     './',
     './index.html',
     './styles.css',
+    './core.js',
     './manifest.webmanifest',
     './icons/icon.svg',
     './icons/icon-192.png',

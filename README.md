@@ -40,10 +40,12 @@ index.html            the whole app (HTML and inline JS)
 styles.css            built stylesheet (generated, committed; don't edit by hand)
 src/tailwind.css      stylesheet source: theme colours, dark mode, custom CSS
 tailwind.config.js    Tailwind setup; turns palette colours into CSS variables for dark mode
+core.js               pure logic (dates, streaks, import, calendar file), unit tested
 sw.js                 service worker for offline use
 manifest.webmanifest  install metadata
 icons/                app icon (SVG source + PNG renders)
-tests/                Playwright tests
+tests/                unit, functional and end-to-end tests
+.githooks/pre-push    runs the tests before every push
 ```
 
 After changing classes in `index.html` or anything in `src/` or `tailwind.config.js`, rebuild the stylesheet and commit `styles.css`:
@@ -52,21 +54,33 @@ After changing classes in `index.html` or anything in `src/` or `tailwind.config
 npm run build:css
 ```
 
-`npm test` rebuilds it first, and one test fails if the page uses a class that `styles.css` doesn't contain.
+`npm test` rebuilds it first, one test fails if the page uses a class that `styles.css` doesn't contain, and the pre-push hook stops a push whose `styles.css` is stale.
 
 **How dark mode works:** every palette colour is a CSS variable. In dark mode the light tints and dark inks swap (`rose-50` ⇄ `rose-950`, and so on), so classes like `bg-rose-50 text-rose-900` need no `dark:` variants. Use `bg-surface` for card and input backgrounds (white in light mode). Add `keep-light` to an area that should look the same in both themes, like the header.
 
-## Running the tests
+## Tests
 
-Requires Node 22+.
+Requires Node 22+. First time:
 
 ```sh
 npm install
 npx playwright install chromium
-npm test
+git config core.hooksPath .githooks   # run the tests before every push (see below)
 ```
 
-The tests start a local server on port 4173 automatically. They also run on GitHub Actions for every push and pull request (see the **Actions** tab).
+Three layers, all run by `npm test` (about 1.5 minutes):
+
+| Layer | Where | What it checks | Run alone |
+| --- | --- | --- | --- |
+| Unit | `tests/unit/` | Pure logic in `core.js`: dates and weeks (month/year ends, leap years, daylight saving), streaks, CSV parsing, entry validation, the calendar file. Node's built-in runner, no browser, under a second. | `npm run test:unit` |
+| Functional | `tests/functional/` | One feature at a time in a real browser: tabs, planner, measurements, charts, backup/restore, offline, dark mode, reminders, edge cases. | `npm run test:functional` |
+| End-to-end | `tests/e2e/` | Whole user journeys through the UI only: the first two weeks of use, moving to a new phone, training offline, using it on a phone in dark mode, the rest timer, adding the calendar reminder. | `npm run test:e2e` |
+
+The browser tests start a local server on port 4173 automatically. Pure logic lives in `core.js` so it can be unit tested; anything that touches the page or storage stays in `index.html`.
+
+**Before every push:** `.githooks/pre-push` runs `npm test` and cancels the push if anything fails, or if `styles.css` was out of date (it is rebuilt; commit it and push again). Enable it once per clone with `git config core.hooksPath .githooks`. To skip it in an emergency: `git push --no-verify`.
+
+**On GitHub:** `.github/workflows/test.yml` runs the same tests on every push and pull request, once GitHub Actions is available on the account.
 
 ## Deploying
 
