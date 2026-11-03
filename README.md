@@ -78,7 +78,7 @@ Three layers, all run by `npm test` (about 1.5 minutes):
 
 The browser tests start a local server on port 4173 automatically. Pure logic lives in `core.js` so it can be unit tested; anything that touches the page or storage stays in `index.html`.
 
-**Before every push:** `.githooks/pre-push` runs `npm test` and cancels the push if anything fails, or if `styles.css` was out of date (it is rebuilt; commit it and push again). Enable it once per clone with `git config core.hooksPath .githooks`. To skip it in an emergency: `git push --no-verify`.
+**Before every push:** `.githooks/pre-push` runs `npm test` and cancels the push if anything fails, or if `styles.css` was out of date (it is rebuilt; commit it and push again). Because the tests read the files in the folder, the hook first refuses if anything is uncommitted or untracked, or if you push a commit other than the one checked out, so the tests always check exactly what goes live. Commit or `git stash -u` first. Enable it once per clone with `git config core.hooksPath .githooks`. To skip it in an emergency: `git push --no-verify`.
 
 **On GitHub:** `.github/workflows/test.yml` runs the same tests on every push and pull request, once GitHub Actions is available on the account.
 
