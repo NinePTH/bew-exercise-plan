@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hourglass Balance — โปรแกรมออกกำลังกายเฉพาะบุคคล</title>
+    <meta name="theme-color" content="#be123c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Hourglass">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -365,6 +371,9 @@
 
             <div id="measureSummary" class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3 mb-4 py-3 border-y border-rose-100"></div>
 
+            <!-- Trend charts: one small chart per measure, each on its own scale -->
+            <div id="measureCharts" class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-5 mb-5"></div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-xs text-left min-w-[560px]">
                     <thead>
@@ -382,8 +391,13 @@
                 </table>
             </div>
             <div class="flex flex-wrap gap-2 mt-3">
-                <button onclick="exportMeasurementsCsv()" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1"><i class="ph-bold ph-download-simple"></i> ดาวน์โหลด CSV (สำรองข้อมูล)</button>
+                <button onclick="exportMeasurementsJson()" id="exportJsonBtn" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1"><i class="ph-bold ph-download-simple"></i> สำรองข้อมูล (JSON)</button>
+                <button onclick="document.getElementById('importFile').click()" id="importBtn" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1"><i class="ph-bold ph-upload-simple"></i> นำเข้าข้อมูล (JSON / CSV)</button>
+                <button onclick="exportMeasurementsCsv()" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1"><i class="ph-bold ph-table"></i> ส่งออก CSV (เปิดใน Excel)</button>
+                <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" class="hidden" onchange="importMeasurementsFile(this)">
             </div>
+            <p id="backupMsg" role="status" aria-live="polite" class="text-xs text-gray-600 mt-2 min-h-[1rem]"></p>
+            <p class="text-[11px] text-gray-500 mt-1">ย้ายเครื่องหรือเปลี่ยนมือถือ: กด "สำรองข้อมูล" แล้วเปิดหน้านี้บนเครื่องใหม่ กด "นำเข้าข้อมูล" เลือกไฟล์ที่ได้</p>
         </section>
 
         <!-- Nutrition & Protein Guide -->
@@ -427,6 +441,56 @@
                     </div>
                 </div>
             </div>
+        </section>
+
+        <!-- Sample Meal Plan -->
+        <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden id="mealPlanSection">
+            <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
+                <i class="ph-fill ph-cooking-pot text-rose-500 text-xl"></i>
+                เมนูตัวอย่าง 1 วัน (ทำกินเองง่ายๆ ในห้องพัก)
+            </h3>
+            <p class="text-xs text-gray-500 mb-4">ตัวอย่างสำหรับน้ำหนักราว 50 กก. ปริมาณโปรตีนเป็นค่าประมาณ ขึ้นกับยี่ห้อและปริมาณจริง ปรับตามเป้าหมายในเครื่องคิดเลขด้านบน และไม่ใช่คำแนะนำทางการแพทย์</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left min-w-[480px]">
+                    <thead>
+                        <tr class="text-gray-500 border-b border-gray-200">
+                            <th class="py-2 pr-3 font-medium w-28">มื้อ</th>
+                            <th class="py-2 pr-3 font-medium">เมนู</th>
+                            <th class="py-2 font-medium text-right w-28">โปรตีน (ประมาณ)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-700">
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2.5 pr-3 font-semibold text-gray-800">เช้า</td>
+                            <td class="py-2.5 pr-3">ข้าวโอ๊ตต้มนมถั่วเหลือง 1 ถ้วย + ไข่ต้ม 1 ฟอง</td>
+                            <td class="py-2.5 text-right">~18 กรัม</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2.5 pr-3 font-semibold text-gray-800">กลางวัน</td>
+                            <td class="py-2.5 pr-3">ข้าวกล้อง 1–1.5 ทัพพี + อกไก่ต้ม/ย่าง 80 กรัม + ผักลวกหรือสลัด</td>
+                            <td class="py-2.5 text-right">~22 กรัม</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2.5 pr-3 font-semibold text-gray-800">หลังออกกำลังกาย</td>
+                            <td class="py-2.5 pr-3">เวย์โปรตีน 1 สคูปผสมน้ำ หรือโยเกิร์ตไม่หวาน + ถั่ว 1 กำมือ</td>
+                            <td class="py-2.5 text-right">~15–22 กรัม</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="py-2.5 pr-3 font-semibold text-gray-800">เย็น (เบาๆ)</td>
+                            <td class="py-2.5 pr-3">ปลาทูน่าในน้ำแร่ ½–1 กระป๋อง หรือเต้าหู้ไข่นึ่ง + ผักใบเขียวต้ม ไม่ปรุงรสจัด</td>
+                            <td class="py-2.5 text-right">~15–20 กรัม</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="py-2.5 pr-3 font-bold text-gray-800">รวม</td>
+                            <td class="py-2.5 pr-3 text-gray-500">น้ำเปล่าอย่างน้อย 1.5–2 ลิตรตลอดวัน</td>
+                            <td class="py-2.5 text-right font-bold text-amber-700">~70–80 กรัม</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="text-xs text-gray-600 mt-3"><strong>สลับได้:</strong> ไข่ต้ม ⇄ เต้าหู้ขาว · อกไก่ ⇄ ปลานึ่ง/กุ้ง · ข้าวกล้อง ⇄ มันเผา/ขนมปังโฮลวีต · ถ้ารวมแล้วเกินเป้าหมายของคุณ ให้ลดมื้อหลังออกกำลังกายเหลือครึ่งสคูป</p>
         </section>
 
     </main>
@@ -1047,7 +1111,7 @@
             e.preventDefault();
             const err = document.getElementById('measureError');
             const entry = {
-                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                id: newId(),
                 date: document.getElementById('mDate').value,
                 weight: numOrNull('mWeight'),
                 waist: numOrNull('mWaist'),
@@ -1077,7 +1141,8 @@
 
         function fmt(v) { return v === null || v === undefined ? '–' : (Math.round(v * 10) / 10).toString(); }
 
-        function deltaChip(label, first, last, unit) {
+        // judge=false for measures where neither direction is "bad" (hips: the goal is to keep or build them).
+        function deltaChip(label, first, last, unit, judge = true) {
             if (first === null || last === null) {
                 return `<div><div class="text-[11px] text-gray-500">${label}</div><div class="text-base font-bold text-gray-400">–</div></div>`;
             }
@@ -1086,7 +1151,7 @@
             return `<div>
                 <div class="text-[11px] text-gray-500">${label}</div>
                 <div class="text-base font-bold text-gray-800">${fmt(last)} <span class="text-[11px] font-normal text-gray-500">${unit}</span></div>
-                <div class="text-[11px] font-semibold ${d < 0 ? 'text-emerald-600' : (d > 0 ? 'text-rose-600' : 'text-gray-500')}">${sign}${d} ${unit} จากครั้งแรก</div>
+                <div class="text-[11px] font-semibold ${!judge ? 'text-gray-600' : (d < 0 ? 'text-emerald-600' : (d > 0 ? 'text-rose-600' : 'text-gray-500'))}">${sign}${d} ${unit} จากครั้งแรก</div>
             </div>`;
         }
 
@@ -1098,6 +1163,7 @@
             if (sorted.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">ยังไม่มีข้อมูล — กรอกค่าครั้งแรกด้านบนเพื่อเริ่มติดตาม</td></tr>`;
                 summary.innerHTML = '';
+                document.getElementById('measureCharts').innerHTML = '';
                 return;
             }
 
@@ -1124,12 +1190,14 @@
             summary.innerHTML =
                 deltaChip('น้ำหนัก', w0, w1, 'กก.') +
                 deltaChip('รอบเอว', c0, c1, 'ซม.') +
-                deltaChip('รอบสะโพก', h0, h1, 'ซม.') +
+                deltaChip('รอบสะโพก', h0, h1, 'ซม.', false) +
                 `<div>
                     <div class="text-[11px] text-gray-500">สัดส่วนเอว ÷ สะโพก</div>
                     <div class="text-base font-bold text-gray-800">${whr ?? '–'}</div>
                     <div class="text-[11px] text-gray-500">ยิ่งต่ำ เอวยิ่งคอดเมื่อเทียบสะโพก</div>
                 </div>`;
+
+            renderCharts(sorted);
 
             // Keep the protein calculator in step with the latest recorded weight.
             if (w1 !== null) {
@@ -1149,6 +1217,221 @@
             a.download = 'body-measurements.csv';
             a.click();
             URL.revokeObjectURL(a.href);
+        }
+
+        function newId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        }
+
+        // ---------- Trend charts (inline SVG, one small chart per measure, each on its own scale) ----------
+        // Series colours are fixed per measure (categorical slots 1-3), so a measure keeps its colour.
+        const CHART_METRICS = [
+            { key: 'weight', label: 'น้ำหนัก', unit: 'กก.', color: '#2a78d6' },
+            { key: 'waist', label: 'รอบเอว', unit: 'ซม.', color: '#eb6834' },
+            { key: 'hip', label: 'รอบสะโพก', unit: 'ซม.', color: '#1baf7a' }
+        ];
+        const CHART_W = 300, CHART_H = 150;
+        const CHART_M = { l: 34, r: 40, t: 12, b: 24 };
+
+        function niceStep(range) {
+            const target = range / 3;
+            for (const s of [0.5, 1, 2, 5, 10, 20]) if (s >= target) return s;
+            return 50;
+        }
+
+        function shortDate(iso) {
+            return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+        }
+
+        function buildChart(metric, sorted) {
+            const pts = sorted.filter(m => m[metric.key] !== null).map(m => ({
+                date: m.date, t: new Date(m.date + 'T00:00:00').getTime(), v: m[metric.key]
+            }));
+            if (pts.length < 2) return '';
+
+            let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+            if (hi - lo < 1) { lo -= 0.5; hi += 0.5; }
+            const step = niceStep(hi - lo);
+            const t0 = Math.floor(lo / step) * step, t1 = Math.ceil(hi / step) * step;
+            const tmin = pts[0].t, tmax = pts[pts.length - 1].t, span = tmax - tmin;
+            const plotW = CHART_W - CHART_M.l - CHART_M.r, plotH = CHART_H - CHART_M.t - CHART_M.b;
+            const px = p => CHART_M.l + (span === 0 ? plotW / 2 : (p.t - tmin) / span * plotW);
+            const py = v => CHART_M.t + (t1 - v) / (t1 - t0) * plotH;
+
+            let grid = '';
+            for (let tick = t0; tick <= t1 + 1e-9; tick += step) {
+                const y = py(tick).toFixed(1);
+                const isBase = Math.abs(tick - t0) < 1e-9;
+                grid += `<line x1="${CHART_M.l}" x2="${CHART_W - CHART_M.r}" y1="${y}" y2="${y}" stroke="${isBase ? '#c3c2b7' : '#e1e0d9'}" stroke-width="1"/>`
+                     + `<text x="${CHART_M.l - 6}" y="${(+y + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="#898781">${fmt(tick)}</text>`;
+            }
+
+            const path = pts.map(p => `${px(p).toFixed(1)},${py(p.v).toFixed(1)}`).join(' ');
+            const last = pts[pts.length - 1];
+            const dots = pts.map((p, i) =>
+                `<circle cx="${px(p).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="4" fill="${metric.color}" stroke="#fff" stroke-width="2"/>`
+              + `<circle class="chart-hit" tabindex="0" cx="${px(p).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="14" fill="transparent"`
+              + ` data-tip="${escapeHtml(p.date)} · ${fmt(p.v)} ${metric.unit}" data-x="${(px(p) / CHART_W * 100).toFixed(1)}" data-y="${(py(p.v) / CHART_H * 100).toFixed(1)}"`
+              + ` aria-label="${metric.label} ${fmt(p.v)} ${metric.unit} วันที่ ${escapeHtml(p.date)}"/>`).join('');
+
+            const xLabels = `<text x="${CHART_M.l}" y="${CHART_H - 6}" font-size="9" fill="#898781">${shortDate(pts[0].date)}</text>`
+                + (span > 0 ? `<text x="${CHART_W - CHART_M.r}" y="${CHART_H - 6}" text-anchor="end" font-size="9" fill="#898781">${shortDate(last.date)}</text>` : '');
+
+            return `<figure class="relative m-0" data-chart="${metric.key}">
+                <figcaption class="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
+                    <span class="inline-block w-3 h-0.5 rounded" style="background:${metric.color}"></span>${metric.label} (${metric.unit})
+                </figcaption>
+                <svg viewBox="0 0 ${CHART_W} ${CHART_H}" class="w-full h-auto" role="img" aria-label="${metric.label}: ${fmt(pts[0].v)} ถึง ${fmt(last.v)} ${metric.unit} จาก ${pts.length} ครั้ง">
+                    ${grid}${xLabels}
+                    <polyline points="${path}" fill="none" stroke="${metric.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                    ${dots}
+                    <text x="${(px(last) + 9).toFixed(1)}" y="${(py(last.v) + 4).toFixed(1)}" font-size="11" font-weight="600" fill="#0b0b0b">${fmt(last.v)}</text>
+                </svg>
+                <div class="chart-tip absolute pointer-events-none bg-gray-900 text-white text-[11px] rounded-md px-2 py-1 whitespace-nowrap" hidden></div>
+            </figure>`;
+        }
+
+        function renderCharts(sorted) {
+            const el = document.getElementById('measureCharts');
+            const html = CHART_METRICS.map(m => buildChart(m, sorted)).join('');
+            el.innerHTML = html || '<p class="text-xs text-gray-500 md:col-span-3">บันทึกอย่างน้อย 2 ครั้งเพื่อดูกราฟแนวโน้ม</p>';
+        }
+
+        (function wireChartTips() {
+            const el = document.getElementById('measureCharts');
+            const show = hit => {
+                const tip = hit.closest('figure').querySelector('.chart-tip');
+                tip.textContent = hit.dataset.tip;
+                tip.style.left = hit.dataset.x + '%';
+                tip.style.top = hit.dataset.y + '%';
+                tip.style.transform = 'translate(-50%, -140%)';
+                tip.hidden = false;
+            };
+            const hideAll = () => el.querySelectorAll('.chart-tip').forEach(t => { t.hidden = true; });
+            el.addEventListener('pointerover', e => { const h = e.target.closest('.chart-hit'); if (h) show(h); });
+            el.addEventListener('focusin', e => { const h = e.target.closest('.chart-hit'); if (h) show(h); });
+            el.addEventListener('pointerout', e => { if (e.target.closest('.chart-hit')) hideAll(); });
+            el.addEventListener('focusout', hideAll);
+        })();
+
+        // ---------- Backup & restore (JSON for backup, CSV for spreadsheets; both can be imported) ----------
+        function setBackupMsg(text, isError) {
+            const el = document.getElementById('backupMsg');
+            el.textContent = text;
+            el.className = 'text-xs mt-2 min-h-[1rem] ' + (isError ? 'text-rose-600' : 'text-emerald-700');
+        }
+
+        function downloadText(filename, mime, text) {
+            const blob = new Blob([text], { type: mime });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function exportMeasurementsJson() {
+            const payload = { app: 'hourglass-balance', version: 1, exportedAt: new Date().toISOString(), measurements };
+            downloadText(`hourglass-backup-${localDateStr()}.json`, 'application/json', JSON.stringify(payload, null, 2));
+            setBackupMsg(`สำรองข้อมูล ${measurements.length} รายการแล้ว`, false);
+        }
+
+        // Minimal CSV parser: quoted fields, "" escapes, CRLF/LF, optional BOM.
+        function parseCsv(text) {
+            const rows = [];
+            let row = [], field = '', inQuotes = false;
+            text = text.replace(/^﻿/, '');
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (inQuotes) {
+                    if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+                    else if (c === '"') inQuotes = false;
+                    else field += c;
+                } else if (c === '"') inQuotes = true;
+                else if (c === ',') { row.push(field); field = ''; }
+                else if (c === '\n' || c === '\r') {
+                    if (c === '\r' && text[i + 1] === '\n') i++;
+                    row.push(field); field = '';
+                    if (row.some(f => f !== '')) rows.push(row);
+                    row = [];
+                } else field += c;
+            }
+            row.push(field);
+            if (row.some(f => f !== '')) rows.push(row);
+            return rows;
+        }
+
+        // Returns a clean entry, or null if the record is unusable.
+        function sanitizeEntry(raw) {
+            if (!raw || typeof raw !== 'object') return null;
+            const date = typeof raw.date === 'string' ? raw.date.trim() : '';
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+            const parsed = new Date(date + 'T00:00:00');
+            if (isNaN(parsed) || localDateStr(parsed) !== date) return null;
+
+            const num = (v, min, max) => {
+                if (v === null || v === undefined || v === '') return null;
+                const n = Number(v);
+                return Number.isFinite(n) && n >= min && n <= max ? n : undefined; // undefined = invalid
+            };
+            const weight = num(raw.weight, 20, 300), waist = num(raw.waist, 20, 250), hip = num(raw.hip, 20, 250);
+            if (weight === undefined || waist === undefined || hip === undefined) return null;
+            if (weight === null && waist === null && hip === null) return null;
+
+            return {
+                id: typeof raw.id === 'string' && /^[\w-]{1,32}$/.test(raw.id) ? raw.id : newId(),
+                date, weight, waist, hip,
+                note: typeof raw.note === 'string' ? raw.note.trim().slice(0, 120) : ''
+            };
+        }
+
+        function recordsFromImport(name, text) {
+            if (/\.csv$/i.test(name)) {
+                const [header, ...rows] = parseCsv(text);
+                if (!header) return [];
+                const col = h => header.map(x => x.trim().toLowerCase()).indexOf(h);
+                const idx = { date: col('date'), weight: col('weight_kg'), waist: col('waist_cm'), hip: col('hip_cm'), note: col('note') };
+                if (idx.date < 0) throw new Error('ไม่พบคอลัมน์ date ในไฟล์ CSV');
+                const get = (r, i) => (i >= 0 && i < r.length ? r[i] : '');
+                return rows.map(r => ({
+                    date: get(r, idx.date), weight: get(r, idx.weight), waist: get(r, idx.waist), hip: get(r, idx.hip), note: get(r, idx.note)
+                }));
+            }
+            const data = JSON.parse(text);
+            const list = Array.isArray(data) ? data : data && data.measurements;
+            if (!Array.isArray(list)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+            return list;
+        }
+
+        async function importMeasurementsFile(input) {
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            if (file.size > 1024 * 1024) { setBackupMsg('ไฟล์ใหญ่เกินไป (สูงสุด 1 MB)', true); return; }
+            try {
+                const records = recordsFromImport(file.name, await file.text());
+                const ids = new Set(measurements.map(m => m.id));
+                const sig = m => [m.date, m.weight, m.waist, m.hip, m.note].join('|');
+                const sigs = new Set(measurements.map(sig));
+                let added = 0, skipped = 0;
+                records.forEach(raw => {
+                    const entry = sanitizeEntry(raw);
+                    if (!entry || sigs.has(sig(entry))) { skipped++; return; }
+                    if (ids.has(entry.id)) entry.id = newId();
+                    ids.add(entry.id);
+                    sigs.add(sig(entry));
+                    measurements.push(entry);
+                    added++;
+                });
+                if (added > 0 && !storageSet(STORAGE_KEYS.measurements, measurements)) {
+                    setBackupMsg('นำเข้าแล้ว แต่บันทึกลงเบราว์เซอร์ไม่ได้ ข้อมูลจะหายเมื่อรีเฟรช', true);
+                } else {
+                    setBackupMsg(`นำเข้า ${added} รายการ` + (skipped ? ` (ข้าม ${skipped} รายการที่ซ้ำหรือไม่ถูกต้อง)` : ''), added === 0 && records.length > 0);
+                }
+                renderMeasurements();
+            } catch (e) {
+                setBackupMsg('นำเข้าไม่สำเร็จ: ' + (e.message || 'ไฟล์ไม่ถูกต้อง'), true);
+            }
         }
 
         // ---------- Protein calculator ----------
@@ -1181,6 +1464,13 @@
         }
 
         window.addEventListener('hashchange', () => showSectionFromHash(true));
+
+        // Offline / installable: the service worker only registers on https or localhost.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
 
         // Initialize App on Load
         window.onload = function() {
