@@ -166,7 +166,7 @@ test.describe('meal plan', () => {
         await page.click('[data-nav=nutrition]');
         await expect(page.locator('#mealPlanSection')).toBeVisible();
         await expect(page.locator('#mealPlanSection tbody tr')).toHaveCount(4);
-        await expect(page.locator('#mealPlanSection tfoot')).toContainText('~70–80 กรัม');
+        await expect(page.locator('#mealPlanSection tfoot')).toContainText('~70–90 กรัม');
     });
 });
 

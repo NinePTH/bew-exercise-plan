@@ -27,7 +27,7 @@
     <header class="keep-light bg-gradient-to-r from-rose-600 via-pink-600 to-amber-700 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
         <div class="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <div class="flex items-center gap-2 mb-2">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
                     <div class="inline-flex items-center gap-2 bg-black/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">
                         <i class="ph-fill ph-sparkle text-amber-200"></i>
                         <span>Inverted Triangle Body Balance</span>
@@ -35,6 +35,9 @@
                     <!-- Theme: follows the device (auto) → light → dark -->
                     <button id="themeBtn" type="button" onclick="cycleTheme()" class="inline-flex items-center gap-1.5 bg-black/15 hover:bg-black/25 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium transition">
                         <i id="themeIcon" class="ph-fill ph-circle-half"></i><span id="themeLabel">อัตโนมัติ</span>
+                    </button>
+                    <button id="helpBtn" type="button" onclick="startTour()" class="inline-flex items-center gap-1.5 bg-black/15 hover:bg-black/25 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium transition">
+                        <i class="ph-bold ph-question" aria-hidden="true"></i><span>วิธีใช้</span>
                     </button>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Hourglass & Core Sculpt</h1>
@@ -334,9 +337,9 @@
             <p class="text-xs text-gray-500 mb-4">เป้าหมาย: ลดรอบเอวเล็กน้อยให้คอด และรักษา/เพิ่มความกระชับของสะโพก เพื่อสร้างสัดส่วนนาฬิกาทราย (น้ำหนัก 50 กก. ถือว่าดีแล้ว เน้นเปลี่ยนไขมันเป็นกล้ามเนื้อ หรือ Body Recomposition)</p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 mb-5 text-xs text-gray-600">
-                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">รอบเอว:</strong> วัดตรงส่วนที่คอดที่สุด (เหนือสะดือเล็กน้อย) ช่วงเช้าหลังตื่นนอนและเข้าห้องน้ำแล้ว</p>
-                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">รอบสะโพก:</strong> วัดตรงส่วนที่กว้างที่สุดของสะโพก/ก้น</p>
-                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">น้ำหนักตัว:</strong> ชั่งสัปดาห์ละ 1 ครั้ง เวลาเดิม เพื่อดูแนวโน้มภาพรวม</p>
+                <p class="flex gap-2"><i class="ph-bold ph-arrows-in-line-horizontal text-rose-600 text-base shrink-0" aria-hidden="true"></i><span><strong class="text-rose-800">รอบเอว:</strong> วัดตรงส่วนที่คอดที่สุด (เหนือสะดือเล็กน้อย) ช่วงเช้าหลังตื่นนอนและเข้าห้องน้ำแล้ว</span></p>
+                <p class="flex gap-2"><i class="ph-bold ph-arrows-out-line-horizontal text-rose-600 text-base shrink-0" aria-hidden="true"></i><span><strong class="text-rose-800">รอบสะโพก:</strong> วัดตรงส่วนที่กว้างที่สุดของสะโพก/ก้น</span></p>
+                <p class="flex gap-2"><i class="ph-bold ph-scales text-rose-600 text-base shrink-0" aria-hidden="true"></i><span><strong class="text-rose-800">น้ำหนักตัว:</strong> ชั่งสัปดาห์ละ 1 ครั้ง เวลาเดิม เพื่อดูแนวโน้มภาพรวม</span></p>
             </div>
 
             <!-- Weekly reminder: a repeating calendar event (works with the app closed) -->
@@ -410,42 +413,45 @@
         </section>
 
         <!-- Nutrition & Protein Guide -->
-        <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden>
+        <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden id="nutritionSection">
             <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
                 <i class="ph-fill ph-bowl-food text-amber-500 text-xl"></i>
-                แนวทางโภชนาการและโปรตีน (Nutrition & Protein Guide)
+                แนวทางโภชนาการและโปรตีน (Nutrition &amp; Protein Guide)
             </h3>
-            <p class="text-xs text-gray-500 mb-4">ปั้นก้น-กระชับขาพร้อมคุมเอว อาหารคือส่วนสำคัญประมาณ 70%</p>
+            <p class="text-xs text-gray-500 mb-4">ปั้นก้น-กระชับขาพร้อมคุมเอว การกินสำคัญพอๆ กับการซ้อม: โปรตีนให้พอ และพลังงานไม่ขาดหรือเกินมากเกินไป</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
                 <div class="md:pr-6 md:border-r border-rose-100">
                     <h4 class="font-bold text-amber-900 mb-2">1. โปรตีนที่ควรได้รับต่อวัน</h4>
-                    <p class="text-amber-900 mb-3">คนเริ่มออกกำลังกายและต้องการกระชับสัดส่วน แนะนำ <strong>1.2 – 1.5 กรัม ต่อน้ำหนักตัว 1 กก.</strong></p>
+                    <p class="text-amber-900 mb-3">คนที่ฝึกเวทเพื่อปั้นกล้ามเนื้อและกระชับสัดส่วน แนะนำ <strong>1.4 – 2.0 กรัม ต่อน้ำหนักตัว 1 กก. ต่อวัน</strong> เป้าที่ดีคือราว <strong>1.6 กรัม/กก.</strong> (กินมากกว่านี้ ผลต่อกล้ามเนื้อเพิ่มขึ้นไม่มาก)</p>
                     <label class="flex items-center gap-2 mb-2">น้ำหนักของคุณ
                         <input id="proteinWeight" type="number" step="0.1" min="20" max="300" value="50" inputmode="decimal" oninput="updateProteinCalc()" class="w-20 border border-amber-200 rounded-lg px-2 py-1 bg-surface">
                         กก.
                     </label>
                     <div class="mb-3">
                         <div class="text-xs text-gray-500">เป้าหมายโปรตีนต่อวัน</div>
-                        <div id="proteinResult" class="text-3xl font-bold text-amber-700">60 – 75 กรัม</div>
+                        <div id="proteinResult" class="text-3xl font-bold text-amber-700">80 กรัม</div>
+                        <div id="proteinRange" class="text-xs text-gray-600">ช่วงที่เหมาะ 70 – 100 กรัม</div>
                     </div>
-                    <p class="text-amber-900"><strong>แหล่งโปรตีนหาซื้อง่าย:</strong> อกไก่, ไข่ต้ม (ไข่ขาว + ไข่แดง), ปลาทูน่าในน้ำแร่, เต้าหู้, นมถั่วเหลือง หรือเวย์โปรตีน 1 สคูป (ประมาณ 20–25 กรัม)</p>
+                    <p class="text-amber-900 mb-2"><strong>แหล่งโปรตีนหาซื้อง่าย:</strong> อกไก่, ไข่ต้ม (ไข่ขาว + ไข่แดง), ปลาทูน่าในน้ำแร่, เต้าหู้, นมถั่วเหลือง หรือเวย์โปรตีน 1 สคูป (ประมาณ 20–25 กรัม) แบ่งกินมื้อละ 20–40 กรัม กระจายทั้งวัน</p>
+                    <p class="text-gray-500">ที่มา: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5477153/" target="_blank" rel="noopener" class="underline underline-offset-2">ISSN Position Stand 2017</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/28698222/" target="_blank" rel="noopener" class="underline underline-offset-2">Morton et al. 2018</a></p>
                 </div>
 
                 <div class="space-y-5">
                     <div>
                         <h4 class="font-bold text-emerald-900 mb-2">2. หลักการเลือกคาร์โบไฮเดรตและไขมัน</h4>
                         <ul class="space-y-1.5 text-emerald-900">
-                            <li><strong>คาร์โบไฮเดรต:</strong> เลือกแบบเชิงซ้อนเพื่อให้มีแรงออกกำลังกาย เช่น ข้าวกล้อง ข้าวโอ๊ต ขนมปังโฮลวีต มันเผา (เลี่ยงแป้งขัดสีและของทอดน้ำมันท่วม)</li>
-                            <li><strong>ไขมันดี:</strong> ทานพอเหมาะ เช่น อะโวคาโด ไข่แดง ถั่วต่างๆ น้ำมันมะกอก ช่วยเรื่องฮอร์โมนเพศหญิงและการเผาผลาญ</li>
+                            <li><strong>คาร์โบไฮเดรต:</strong> เลือกแบบเชิงซ้อนเพื่อให้มีแรงซ้อม เช่น ข้าวกล้อง ข้าวโอ๊ต ขนมปังโฮลวีต มันเผา (เลี่ยงแป้งขัดสีและของทอดน้ำมันท่วม)</li>
+                            <li><strong>ไขมันดี:</strong> อย่าตัดไขมันจนน้อยเกินไป เลือกจากอะโวคาโด ไข่แดง ถั่ว น้ำมันมะกอก และระวังการกินน้อยเกินไปโดยรวม เพราะพลังงานที่ขาดต่อเนื่องนานๆ ทำให้ประจำเดือนและฮอร์โมนผิดปกติได้</li>
                         </ul>
                     </div>
                     <div class="pt-5 border-t border-rose-100">
-                        <h4 class="font-bold text-rose-900 mb-2">3. ทริกการกินช่วงลดไขมันหน้าท้อง (เอวเล็ก)</h4>
+                        <h4 class="font-bold text-rose-900 mb-2">3. ช่วยให้เอวดูคอด หน้าท้องดูแบน</h4>
                         <ul class="space-y-1.5 text-rose-900">
-                            <li>มื้อเย็นเบาๆ: โปรตีน + ผักใบเขียว</li>
-                            <li>เลี่ยงอาหารรสจัด เค็มจัด เพื่อลดอาการบวมน้ำ หน้าท้องจะดูแบนราบไวขึ้น</li>
-                            <li>ดื่มน้ำเปล่าอย่างน้อย 1.5 – 2 ลิตรต่อวัน</li>
+                            <li>ไขมันหน้าท้องลดได้จาก<strong>พลังงานรวมที่กินทั้งวัน</strong> การเล่นท่าหน้าท้องอย่างเดียวไม่ได้เลือกลดไขมันเฉพาะจุด</li>
+                            <li>มื้อเย็นเบาๆ (โปรตีน + ผักใบเขียว) และไม่กินดึกเกินไป ช่วยให้คุมพลังงานรวมได้ง่ายขึ้น</li>
+                            <li>เลี่ยงอาหารเค็มจัด ลดอาการบวมน้ำ หน้าท้องจะดูแบนขึ้น (ที่ลดคือน้ำ ไม่ใช่ไขมัน)</li>
+                            <li>ดื่มน้ำเปล่าอย่างน้อย 1.5 – 2 ลิตรต่อวัน และมากขึ้นในวันที่อากาศร้อนหรือซ้อมหนัก</li>
                         </ul>
                     </div>
                 </div>
@@ -476,33 +482,49 @@
                         </tr>
                         <tr class="border-b border-gray-100">
                             <td class="py-2.5 pr-3 font-semibold text-gray-800">กลางวัน</td>
-                            <td class="py-2.5 pr-3">ข้าวกล้อง 1–1.5 ทัพพี + อกไก่ต้ม/ย่าง 80 กรัม + ผักลวกหรือสลัด</td>
-                            <td class="py-2.5 text-right">~22 กรัม</td>
+                            <td class="py-2.5 pr-3">ข้าวกล้อง 1–1.5 ทัพพี + อกไก่ต้ม/ย่าง 80 กรัม (น้ำหนักสุก) + ผักลวกหรือสลัด</td>
+                            <td class="py-2.5 text-right">~25 กรัม</td>
                         </tr>
                         <tr class="border-b border-gray-100">
                             <td class="py-2.5 pr-3 font-semibold text-gray-800">หลังออกกำลังกาย</td>
-                            <td class="py-2.5 pr-3">เวย์โปรตีน 1 สคูปผสมน้ำ หรือโยเกิร์ตไม่หวาน + ถั่ว 1 กำมือ</td>
-                            <td class="py-2.5 text-right">~15–22 กรัม</td>
+                            <td class="py-2.5 pr-3">เวย์โปรตีน 1 สคูปผสมน้ำ หรือกรีกโยเกิร์ตไม่หวาน 1 ถ้วย + ถั่ว 1 กำมือ</td>
+                            <td class="py-2.5 text-right">~15–25 กรัม</td>
                         </tr>
                         <tr class="border-b border-gray-100">
                             <td class="py-2.5 pr-3 font-semibold text-gray-800">เย็น (เบาๆ)</td>
-                            <td class="py-2.5 pr-3">ปลาทูน่าในน้ำแร่ ½–1 กระป๋อง หรือเต้าหู้ไข่นึ่ง + ผักใบเขียวต้ม ไม่ปรุงรสจัด</td>
-                            <td class="py-2.5 text-right">~15–20 กรัม</td>
+                            <td class="py-2.5 pr-3">ปลาทูน่าในน้ำแร่ 1 กระป๋อง (~20 กรัม) หรือเต้าหู้ไข่ 1 หลอด + ไข่ต้ม 1 ฟอง (~13 กรัม) + ผักใบเขียวต้ม ไม่ปรุงรสจัด</td>
+                            <td class="py-2.5 text-right">~13–22 กรัม</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <td class="py-2.5 pr-3 font-bold text-gray-800">รวม</td>
                             <td class="py-2.5 pr-3 text-gray-500">น้ำเปล่าอย่างน้อย 1.5–2 ลิตรตลอดวัน</td>
-                            <td class="py-2.5 text-right font-bold text-amber-700">~70–80 กรัม</td>
+                            <td class="py-2.5 text-right font-bold text-amber-700">~70–90 กรัม</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
-            <p class="text-xs text-gray-600 mt-3"><strong>สลับได้:</strong> ไข่ต้ม ⇄ เต้าหู้ขาว · อกไก่ ⇄ ปลานึ่ง/กุ้ง · ข้าวกล้อง ⇄ มันเผา/ขนมปังโฮลวีต · ถ้ารวมแล้วเกินเป้าหมายของคุณ ให้ลดมื้อหลังออกกำลังกายเหลือครึ่งสคูป</p>
+            <p class="text-xs text-gray-600 mt-3"><strong>สลับได้:</strong> ไข่ต้ม ⇄ เต้าหู้ขาว · อกไก่ ⇄ ปลานึ่ง/กุ้ง · ข้าวกล้อง ⇄ มันเผา/ขนมปังโฮลวีต · ปรับปริมาณให้ใกล้เป้าหมายในเครื่องคิดเลขด้านบน (น้ำหนัก 50 กก. ≈ 80 กรัม)</p>
         </section>
 
     </main>
+
+    <!-- First-run tour: dims the page and spotlights the real control; never blocks the page underneath -->
+    <div id="tour" class="fixed inset-0 z-50 pointer-events-none" hidden>
+        <div id="tourSpot" class="tour-spot" aria-hidden="true"></div>
+        <div id="tourCard" role="dialog" aria-modal="false" aria-labelledby="tourTitle" aria-describedby="tourBody" onkeydown="tourKey(event)"
+            class="tour-card fixed pointer-events-auto bg-surface text-gray-800 rounded-2xl border border-rose-100 shadow-xl p-5">
+            <h2 id="tourTitle" class="text-base font-bold text-gray-900 leading-snug"></h2>
+            <p id="tourBody" class="text-sm text-gray-600 mt-1.5 leading-relaxed"></p>
+            <div class="flex items-center gap-1.5 mt-4">
+                <span id="tourCount" class="text-xs text-gray-500 tabular-nums mr-auto"></span>
+                <button type="button" id="tourSkip" onclick="endTour()" class="min-h-[44px] px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition">ข้าม</button>
+                <button type="button" id="tourBack" onclick="tourGo(-1)" class="min-h-[44px] px-3 rounded-lg text-sm font-medium text-rose-700 hover:bg-rose-50 transition">ย้อนกลับ</button>
+                <button type="button" id="tourNext" onclick="tourGo(1)" class="min-h-[44px] px-4 rounded-lg text-sm font-semibold bg-brand hover:bg-brand-dark text-white transition">ถัดไป</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Pure logic (dates, streaks, import, calendar file); unit-tested in tests/unit -->
     <script src="core.js"></script>
@@ -1603,8 +1625,11 @@
         function updateProteinCalc() {
             const w = parseFloat(document.getElementById('proteinWeight').value);
             const out = document.getElementById('proteinResult');
-            if (!Number.isFinite(w) || w <= 0) { out.textContent = '–'; return; }
-            out.textContent = `${Math.round(w * 1.2)} – ${Math.round(w * 1.5)} กรัม`;
+            const range = document.getElementById('proteinRange');
+            if (!Number.isFinite(w) || w <= 0) { out.textContent = '–'; range.textContent = ''; return; }
+            // Aim for ~1.6 g/kg (Morton 2018); 1.4–2.0 g/kg is the ISSN range for people who train.
+            out.textContent = `${Math.round(w * 1.6)} กรัม`;
+            range.textContent = `ช่วงที่เหมาะ ${Math.round(w * 1.4)} – ${Math.round(w * 2.0)} กรัม`;
         }
 
         // ---------- Section navigation (#workout / #progress / #nutrition) ----------
@@ -1718,6 +1743,154 @@
             document.getElementById('reminderMsg').textContent = `ดาวน์โหลดแล้ว: เตือนทุกวัน${dayName} เวลา ${settings.time} น. เปิดไฟล์เพื่อเพิ่มลงปฏิทิน`;
         }
 
+        // ---------- First-run tour ----------
+        // Four steps that spotlight the real controls. Shown once to brand-new users (no saved data),
+        // replayable from the header's "วิธีใช้" button. The page underneath stays usable.
+        const TOUR_KEY = 'hg.tourSeen';
+        const TOUR_STEPS = [
+            {
+                tab: 'workout', target: () => document.getElementById('planBtn-3').parentElement,
+                title: 'เลือกแพลนที่ทำไหว',
+                body: 'เพิ่งเริ่มหรือห่างหายไปนาน เลือก 3 วันก่อน แล้วค่อยขยับเป็น 4–5 วันเมื่อร่างกายคุ้นเคย เปลี่ยนได้ตลอด'
+            },
+            {
+                tab: 'workout', target: () => document.querySelector('#exerciseList > div button[onclick^="toggleExerciseDone"]'),
+                title: 'ทำท่าไหนเสร็จ กดเช็กไว้',
+                body: 'แตะวันในตาราง แอปจะเปิดท่าฝึกของวันนั้นให้ ทำแต่ละท่าเสร็จก็กดปุ่มนี้ ระบบจะจำไว้เป็นประวัติ'
+            },
+            {
+                tab: 'workout', target: () => document.querySelectorAll('#dayTrackerContainer > div')[(new Date().getDay() + 6) % 7],
+                title: 'ซ้อมเสร็จ เช็กชื่อวันนี้',
+                body: 'กดวงกลมมุมขวาบนของวันนี้ทุกครั้งที่ซ้อมเสร็จ สัปดาห์ไหนเช็กชื่อครบ 3 วัน จะนับเป็นสัปดาห์ติดต่อกันในแท็บความคืบหน้า'
+            },
+            {
+                tab: 'progress', target: () => document.getElementById('exportJsonBtn'),
+                title: 'ข้อมูลอยู่ในเครื่องนี้เท่านั้น',
+                body: 'ไม่มีบัญชีและไม่ส่งข้อมูลไปไหน ถ้าเปลี่ยนมือถือหรือล้างข้อมูลเบราว์เซอร์ ข้อมูลจะหาย กดสำรองข้อมูลเก็บไฟล์ไว้เป็นระยะ ดูวิธีใช้ซ้ำได้จากปุ่ม "วิธีใช้" ด้านบน'
+            }
+        ];
+        let tourIndex = -1, tourReturnTab = 'workout', tourReturnFocus = null, tourFrame = 0, tourScrollTimer = 0;
+
+        // Switch tab without the hashchange handler's scroll-to-top.
+        function setSection(tab) {
+            if (location.hash.slice(1) !== tab) history.replaceState(null, '', '#' + tab);
+            showSection(tab);
+        }
+
+        function startTour() {
+            const current = location.hash.slice(1);
+            tourReturnTab = SECTIONS.includes(current) ? current : 'workout';
+            tourReturnFocus = document.activeElement;
+            try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
+            document.getElementById('tour').hidden = false;
+            window.addEventListener('scroll', onTourScroll, { passive: true });
+            window.addEventListener('resize', scheduleTourPlace);
+            showTourStep(0);
+        }
+
+        function endTour() {
+            if (tourIndex < 0) return;
+            tourIndex = -1;
+            document.getElementById('tour').hidden = true;
+            window.removeEventListener('scroll', onTourScroll);
+            window.removeEventListener('resize', scheduleTourPlace);
+            setSection(tourReturnTab);
+            const back = tourReturnFocus && document.contains(tourReturnFocus) && tourReturnFocus !== document.body
+                ? tourReturnFocus : document.getElementById('helpBtn');
+            back.focus({ preventScroll: true });
+        }
+
+        function tourGo(delta) {
+            const next = tourIndex + delta;
+            if (next >= TOUR_STEPS.length) endTour();
+            else if (next >= 0) showTourStep(next);
+        }
+
+        function tourKey(e) {
+            if (e.key === 'Escape') { e.preventDefault(); endTour(); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); tourGo(1); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); tourGo(-1); }
+        }
+
+        function showTourStep(i) {
+            tourIndex = i;
+            const step = TOUR_STEPS[i], last = i === TOUR_STEPS.length - 1;
+            setSection(step.tab);
+            document.getElementById('tourTitle').textContent = step.title;
+            document.getElementById('tourBody').textContent = step.body;
+            document.getElementById('tourCount').textContent = `${i + 1} / ${TOUR_STEPS.length}`;
+            document.getElementById('tourBack').hidden = i === 0;
+            document.getElementById('tourSkip').hidden = last;
+            document.getElementById('tourNext').textContent = last ? 'เริ่มใช้งาน' : 'ถัดไป';
+            const target = step.target();
+            // Jump the page, then let the spotlight glide to the target (the one animated moment).
+            if (target) target.scrollIntoView({ block: 'center', behavior: 'auto' });
+            document.getElementById('tour').classList.remove('tour-still');
+            placeTour();
+            document.getElementById('tourNext').focus({ preventScroll: true });
+        }
+
+        // While the user scrolls, follow the target instantly instead of gliding behind it.
+        function onTourScroll() {
+            const root = document.getElementById('tour');
+            root.classList.add('tour-still');
+            clearTimeout(tourScrollTimer);
+            tourScrollTimer = setTimeout(() => root.classList.remove('tour-still'), 150);
+            scheduleTourPlace();
+        }
+
+        function scheduleTourPlace() {
+            cancelAnimationFrame(tourFrame);
+            tourFrame = requestAnimationFrame(placeTour);
+        }
+
+        function placeTour() {
+            if (tourIndex < 0) return;
+            const spot = document.getElementById('tourSpot'), card = document.getElementById('tourCard');
+            const vw = window.innerWidth, vh = window.innerHeight, pad = 8, gap = 14, margin = 16;
+            // On phones the tab bar is fixed at the bottom; keep the card above it.
+            const nav = document.getElementById('sectionNav');
+            const bottom = getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().top : vh;
+            const w = Math.min(360, vw - margin * 2);
+            card.style.width = w + 'px';
+            const h = card.offsetHeight;
+
+            const target = TOUR_STEPS[tourIndex].target();
+            const r = target ? target.getBoundingClientRect() : null;
+            if (!r || (r.width === 0 && r.height === 0)) {
+                spot.style.opacity = '0';
+                card.style.top = Math.max(margin, (bottom - h) / 2) + 'px';
+                card.style.left = (vw - w) / 2 + 'px';
+                return;
+            }
+            spot.style.opacity = '1';
+            spot.style.top = (r.top - pad) + 'px';
+            spot.style.left = (r.left - pad) + 'px';
+            spot.style.width = (r.width + pad * 2) + 'px';
+            spot.style.height = (r.height + pad * 2) + 'px';
+
+            // Below the target if it fits, otherwise above, always inside the visible area.
+            let top = r.bottom + pad + gap;
+            if (top + h > bottom - margin) top = r.top - pad - gap - h;
+            top = Math.max(margin, Math.min(top, bottom - margin - h));
+            const left = Math.min(Math.max(r.left + r.width / 2 - w / 2, margin), vw - w - margin);
+            card.style.top = top + 'px';
+            card.style.left = left + 'px';
+        }
+
+        // Brand-new users only: anyone with saved data already knows their way around.
+        function maybeStartTour() {
+            let seen = true;
+            try { seen = localStorage.getItem(TOUR_KEY) === '1'; } catch (e) {} // no storage: don't nag every visit
+            if (seen) return;
+            const hasData = measurements.length || checkinDates.size || Object.keys(exerciseLog).length;
+            if (hasData) { try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {} return; }
+            startTour();
+            // Fonts and icons can shift the layout after first paint; re-aim once they're in.
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleTourPlace);
+            window.addEventListener('load', scheduleTourPlace, { once: true });
+        }
+
         // ---------- Theme (auto follows the device; the head script applies a saved choice before paint) ----------
         const THEME_KEY = 'hg.theme';
         const THEMES = {
@@ -1762,6 +1935,7 @@
             renderExercises();
             renderMeasurements();
             updateProteinCalc();
+            maybeStartTour();
         }
 
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

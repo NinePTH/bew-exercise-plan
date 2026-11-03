@@ -135,20 +135,22 @@ test.describe('measurement tracker', () => {
 });
 
 test.describe('protein calculator', () => {
-    test('gives 1.2–1.5 g/kg for 50 kg', async ({ page }) => {
-        await expect(page.locator('#proteinResult')).toHaveText('60 – 75 กรัม');
+    test('aims for 1.6 g/kg within a 1.4–2.0 g/kg range, for 50 kg', async ({ page }) => {
+        await expect(page.locator('#proteinResult')).toHaveText('80 กรัม');
+        await expect(page.locator('#proteinRange')).toHaveText('ช่วงที่เหมาะ 70 – 100 กรัม');
     });
 
     test('updates when the weight changes', async ({ page }) => {
         await page.click('[data-nav=nutrition]');
         await page.fill('#proteinWeight', '60');
-        await expect(page.locator('#proteinResult')).toHaveText('72 – 90 กรัม');
+        await expect(page.locator('#proteinResult')).toHaveText('96 กรัม');
+        await expect(page.locator('#proteinRange')).toHaveText('ช่วงที่เหมาะ 84 – 120 กรัม');
     });
 
     test('follows the latest recorded weight', async ({ page }) => {
         await page.click('[data-nav=progress]');
         await fillEntry(page, { weight: 55 });
-        await expect(page.locator('#proteinResult')).toHaveText('66 – 83 กรัม');
+        await expect(page.locator('#proteinResult')).toHaveText('88 กรัม');
     });
 });
 

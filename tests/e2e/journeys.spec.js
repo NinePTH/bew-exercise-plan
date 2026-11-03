@@ -18,6 +18,41 @@ async function logMeasurement(page, { date, weight, waist, hip, note = '' }) {
     await page.getByRole('button', { name: 'บันทึก', exact: true }).click();
 }
 
+test('a friend opens the link for the first time and follows the tour, doing each step for real', async ({ browser }) => {
+    const ctx = await browser.newContext({ storageState: { cookies: [], origins: [] }, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+    const page = await ctx.newPage();
+    await page.clock.install({ time: WED_4_NOV });
+    await page.goto('/');
+
+    // Step 1: pick the beginner plan right under the spotlight.
+    await expect(page.locator('#tourTitle')).toHaveText('เลือกแพลนที่ทำไหว');
+    await page.getByRole('button', { name: '3 วัน (เริ่มต้น)' }).tap();
+    await page.locator('#tourNext').tap();
+
+    // Step 2: finish an exercise.
+    await doneButton(page.locator('#exerciseList > div').first()).tap();
+    await expect(page.locator('#completedExercisesCount')).toHaveText('1');
+    await page.locator('#tourNext').tap();
+
+    // Step 3: check in for today.
+    await page.getByRole('button', { name: 'เช็กชื่อวันพุธ' }).tap();
+    await page.locator('#tourNext').tap();
+
+    // Step 4: back up, then start using the app.
+    await expect(page).toHaveURL(/#progress$/);
+    await expect(page.locator('#statWeek')).toContainText('1 / 3');
+    const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#exportJsonBtn').tap()]);
+    expect(download.suggestedFilename()).toMatch(/^hourglass-backup-/);
+    await page.locator('#tourNext').tap();
+    await expect(page.locator('#tour')).toBeHidden();
+
+    // Coming back later: no tour, everything kept.
+    await page.reload();
+    await expect(page.locator('#tour')).toBeHidden();
+    await expect(page.getByRole('button', { name: 'เช็กชื่อวันพุธ' })).toHaveAttribute('aria-pressed', 'true');
+    await ctx.close();
+});
+
 test('first two weeks: plan, train, check in, measure, get reminded, measure again', async ({ page }) => {
     await page.clock.install({ time: WED_4_NOV });
     await page.goto('/');
