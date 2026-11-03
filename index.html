@@ -19,7 +19,7 @@
             border: 1px solid rgba(244, 63, 94, 0.12);
         }
         .active-tab {
-            background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+            background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
             color: white;
             box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
         }
@@ -309,6 +309,109 @@
             </div>
         </section>
 
+        <!-- Body Measurement Tracker -->
+        <section class="glass-card rounded-2xl p-5 shadow-sm" id="measureSection">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                    <i class="ph-fill ph-ruler text-rose-500 text-xl"></i>
+                    บันทึกและติดตามสัดส่วน (Body Measurement Tracker)
+                </h3>
+                <span class="text-[11px] text-gray-500 flex items-center gap-1"><i class="ph-fill ph-device-mobile"></i> ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น</span>
+            </div>
+            <p class="text-xs text-gray-500 mb-4">เป้าหมาย: ลดรอบเอวเล็กน้อยให้คอด และรักษา/เพิ่มความกระชับของสะโพก เพื่อสร้างสัดส่วนนาฬิกาทราย (น้ำหนัก 50 กก. ถือว่าดีแล้ว เน้นเปลี่ยนไขมันเป็นกล้ามเนื้อ หรือ Body Recomposition)</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-2 mb-5 text-xs text-gray-600">
+                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">รอบเอว:</strong> วัดตรงส่วนที่คอดที่สุด (เหนือสะดือเล็กน้อย) ช่วงเช้าหลังตื่นนอนและเข้าห้องน้ำแล้ว</p>
+                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">รอบสะโพก:</strong> วัดตรงส่วนที่กว้างที่สุดของสะโพก/ก้น</p>
+                <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">น้ำหนักตัว:</strong> ชั่งสัปดาห์ละ 1 ครั้ง เวลาเดิม เพื่อดูแนวโน้มภาพรวม</p>
+            </div>
+
+            <form id="measureForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4 items-end text-xs" onsubmit="addMeasurement(event)">
+                <label class="flex flex-col gap-1">วันที่
+                    <input id="mDate" type="date" required class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                </label>
+                <label class="flex flex-col gap-1">น้ำหนัก (กก.)
+                    <input id="mWeight" type="number" step="0.1" min="20" max="300" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                </label>
+                <label class="flex flex-col gap-1">รอบเอว (ซม.)
+                    <input id="mWaist" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                </label>
+                <label class="flex flex-col gap-1">รอบสะโพก (ซม.)
+                    <input id="mHip" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                </label>
+                <label class="flex flex-col gap-1 col-span-2 md:col-span-1">หมายเหตุ / ความรู้สึก
+                    <input id="mNote" type="text" maxlength="120" placeholder="เช่น เริ่มต้นโปรแกรม" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                </label>
+                <button type="submit" class="col-span-2 md:col-span-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg font-semibold transition">บันทึก</button>
+            </form>
+            <p id="measureError" class="text-xs text-rose-600 mb-3 hidden"></p>
+
+            <div id="measureSummary" class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-3 mb-4 py-3 border-y border-rose-100"></div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs text-left min-w-[560px]">
+                    <thead>
+                        <tr class="text-gray-500 border-b border-gray-200">
+                            <th class="py-2 pr-2 font-medium">สัปดาห์ที่</th>
+                            <th class="py-2 pr-2 font-medium">วันที่</th>
+                            <th class="py-2 pr-2 font-medium">น้ำหนัก (กก.)</th>
+                            <th class="py-2 pr-2 font-medium">เอว (ซม.)</th>
+                            <th class="py-2 pr-2 font-medium">สะโพก (ซม.)</th>
+                            <th class="py-2 pr-2 font-medium">หมายเหตุ</th>
+                            <th class="py-2 w-8"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="measureRows"></tbody>
+                </table>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-3">
+                <button onclick="exportMeasurementsCsv()" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg text-xs font-medium transition flex items-center gap-1"><i class="ph-bold ph-download-simple"></i> ดาวน์โหลด CSV (สำรองข้อมูล)</button>
+            </div>
+        </section>
+
+        <!-- Nutrition & Protein Guide -->
+        <section class="glass-card rounded-2xl p-5 shadow-sm">
+            <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
+                <i class="ph-fill ph-bowl-food text-amber-500 text-xl"></i>
+                แนวทางโภชนาการและโปรตีน (Nutrition & Protein Guide)
+            </h3>
+            <p class="text-xs text-gray-500 mb-4">ปั้นก้น-กระชับขาพร้อมคุมเอว อาหารคือส่วนสำคัญประมาณ 70%</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+                <div class="md:pr-6 md:border-r border-rose-100">
+                    <h4 class="font-bold text-amber-900 mb-2">1. โปรตีนที่ควรได้รับต่อวัน</h4>
+                    <p class="text-amber-900 mb-3">คนเริ่มออกกำลังกายและต้องการกระชับสัดส่วน แนะนำ <strong>1.2 – 1.5 กรัม ต่อน้ำหนักตัว 1 กก.</strong></p>
+                    <label class="flex items-center gap-2 mb-2">น้ำหนักของคุณ
+                        <input id="proteinWeight" type="number" step="0.1" min="20" max="300" value="50" inputmode="decimal" oninput="updateProteinCalc()" class="w-20 border border-amber-200 rounded-lg px-2 py-1 bg-white">
+                        กก.
+                    </label>
+                    <div class="mb-3">
+                        <div class="text-[11px] text-gray-500">เป้าหมายโปรตีนต่อวัน</div>
+                        <div id="proteinResult" class="text-3xl font-bold text-amber-700">60 – 75 กรัม</div>
+                    </div>
+                    <p class="text-amber-900"><strong>แหล่งโปรตีนหาซื้อง่าย:</strong> อกไก่, ไข่ต้ม (ไข่ขาว + ไข่แดง), ปลาทูน่าในน้ำแร่, เต้าหู้, นมถั่วเหลือง หรือเวย์โปรตีน 1 สคูป (ประมาณ 20–25 กรัม)</p>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <h4 class="font-bold text-emerald-900 mb-2">2. หลักการเลือกคาร์โบไฮเดรตและไขมัน</h4>
+                        <ul class="space-y-1.5 text-emerald-900">
+                            <li><strong>คาร์โบไฮเดรต:</strong> เลือกแบบเชิงซ้อนเพื่อให้มีแรงออกกำลังกาย เช่น ข้าวกล้อง ข้าวโอ๊ต ขนมปังโฮลวีต มันเผา (เลี่ยงแป้งขัดสีและของทอดน้ำมันท่วม)</li>
+                            <li><strong>ไขมันดี:</strong> ทานพอเหมาะ เช่น อะโวคาโด ไข่แดง ถั่วต่างๆ น้ำมันมะกอก ช่วยเรื่องฮอร์โมนเพศหญิงและการเผาผลาญ</li>
+                        </ul>
+                    </div>
+                    <div class="pt-5 border-t border-rose-100">
+                        <h4 class="font-bold text-rose-900 mb-2">3. ทริกการกินช่วงลดไขมันหน้าท้อง (เอวเล็ก)</h4>
+                        <ul class="space-y-1.5 text-rose-900">
+                            <li>มื้อเย็นเบาๆ: โปรตีน + ผักใบเขียว</li>
+                            <li>เลี่ยงอาหารรสจัด เค็มจัด เพื่อลดอาการบวมน้ำ หน้าท้องจะดูแบนราบไวขึ้น</li>
+                            <li>ดื่มน้ำเปล่าอย่างน้อย 1.5 – 2 ลิตรต่อวัน</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script>
@@ -555,6 +658,7 @@
 
         function setWeeklyPlan(freq) {
             currentPlanFreq = freq;
+            saveProgress();
             [3, 4, 5].forEach(num => {
                 const btn = document.getElementById(`planBtn-${num}`);
                 if (num === freq) {
@@ -615,6 +719,7 @@
 
         function toggleDayCheck(dayId) {
             checkedDaysState[dayId] = !checkedDaysState[dayId];
+            saveProgress();
             renderDayTracker();
         }
 
@@ -732,6 +837,7 @@
             const target = program.exercises.find(e => e.id === exId);
             if (target) {
                 target.done = !target.done;
+                saveProgress();
                 renderExercises();
             }
         }
@@ -851,10 +957,201 @@
             }, 1000);
         }
 
+        // ---------- Persistence (localStorage, with safe fallbacks) ----------
+        const STORAGE_KEYS = { measurements: 'hg.measurements.v1', progress: 'hg.progress.v1' };
+
+        function storageGet(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function storageSet(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function localDateStr(d = new Date()) {
+            const p = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+        }
+
+        function mondayOfWeekStr(d = new Date()) {
+            const m = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            m.setDate(m.getDate() - ((m.getDay() + 6) % 7));
+            return localDateStr(m);
+        }
+
+        // Exercise ticks reset each day, weekday check-ins reset each week.
+        function saveProgress() {
+            const exDone = {};
+            Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { if (ex.done) exDone[ex.id] = true; }));
+            storageSet(STORAGE_KEYS.progress, {
+                date: localDateStr(),
+                week: mondayOfWeekStr(),
+                freq: currentPlanFreq,
+                exDone,
+                days: checkedDaysState
+            });
+        }
+
+        function loadProgress() {
+            const saved = storageGet(STORAGE_KEYS.progress, null);
+            if (!saved) return;
+            if (schedulePlans[saved.freq]) currentPlanFreq = saved.freq;
+            if (saved.week === mondayOfWeekStr() && saved.days) {
+                Object.keys(checkedDaysState).forEach(k => { checkedDaysState[k] = !!saved.days[k]; });
+            }
+            if (saved.date === localDateStr() && saved.exDone) {
+                Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = !!saved.exDone[ex.id]; }));
+            }
+        }
+
+        // ---------- Body Measurement Tracker ----------
+        let measurements = [];
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function numOrNull(id) {
+            const v = parseFloat(document.getElementById(id).value);
+            return Number.isFinite(v) ? v : null;
+        }
+
+        function addMeasurement(e) {
+            e.preventDefault();
+            const err = document.getElementById('measureError');
+            const entry = {
+                id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+                date: document.getElementById('mDate').value,
+                weight: numOrNull('mWeight'),
+                waist: numOrNull('mWaist'),
+                hip: numOrNull('mHip'),
+                note: document.getElementById('mNote').value.trim()
+            };
+            if (!entry.date || (entry.weight === null && entry.waist === null && entry.hip === null)) {
+                err.textContent = 'กรอกวันที่ และอย่างน้อย 1 ค่า (น้ำหนัก / เอว / สะโพก)';
+                err.classList.remove('hidden');
+                return;
+            }
+            err.classList.add('hidden');
+            measurements.push(entry);
+            if (!storageSet(STORAGE_KEYS.measurements, measurements)) {
+                err.textContent = 'บันทึกลงเบราว์เซอร์ไม่ได้ (อาจปิดการเก็บข้อมูลหรืออยู่ในโหมดส่วนตัว) ข้อมูลจะหายเมื่อรีเฟรช — กดดาวน์โหลด CSV เก็บไว้';
+                err.classList.remove('hidden');
+            }
+            ['mWeight', 'mWaist', 'mHip', 'mNote'].forEach(id => { document.getElementById(id).value = ''; });
+            renderMeasurements();
+        }
+
+        function deleteMeasurement(id) {
+            measurements = measurements.filter(m => m.id !== id);
+            storageSet(STORAGE_KEYS.measurements, measurements);
+            renderMeasurements();
+        }
+
+        function fmt(v) { return v === null || v === undefined ? '–' : (Math.round(v * 10) / 10).toString(); }
+
+        function deltaChip(label, first, last, unit) {
+            if (first === null || last === null) {
+                return `<div><div class="text-[11px] text-gray-500">${label}</div><div class="text-base font-bold text-gray-400">–</div></div>`;
+            }
+            const d = Math.round((last - first) * 10) / 10;
+            const sign = d > 0 ? '+' : '';
+            return `<div>
+                <div class="text-[11px] text-gray-500">${label}</div>
+                <div class="text-base font-bold text-gray-800">${fmt(last)} <span class="text-[11px] font-normal text-gray-500">${unit}</span></div>
+                <div class="text-[11px] font-semibold ${d < 0 ? 'text-emerald-600' : (d > 0 ? 'text-rose-600' : 'text-gray-500')}">${sign}${d} ${unit} จากครั้งแรก</div>
+            </div>`;
+        }
+
+        function renderMeasurements() {
+            const sorted = [...measurements].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+            const tbody = document.getElementById('measureRows');
+            const summary = document.getElementById('measureSummary');
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">ยังไม่มีข้อมูล — กรอกค่าครั้งแรกด้านบนเพื่อเริ่มติดตาม</td></tr>`;
+                summary.innerHTML = '';
+                return;
+            }
+
+            const firstDate = new Date(sorted[0].date + 'T00:00:00');
+            const rows = sorted.map(m => {
+                const week = Math.floor((new Date(m.date + 'T00:00:00') - firstDate) / (7 * 86400000)) + 1;
+                return `<tr class="border-b border-gray-100">
+                    <td class="py-2 pr-2 font-medium text-gray-700">สัปดาห์ที่ ${week}</td>
+                    <td class="py-2 pr-2">${escapeHtml(m.date)}</td>
+                    <td class="py-2 pr-2">${fmt(m.weight)}</td>
+                    <td class="py-2 pr-2">${fmt(m.waist)}</td>
+                    <td class="py-2 pr-2">${fmt(m.hip)}</td>
+                    <td class="py-2 pr-2 text-gray-600">${escapeHtml(m.note || '')}</td>
+                    <td class="py-2"><button onclick="deleteMeasurement('${m.id}')" title="ลบรายการนี้" class="text-gray-400 hover:text-rose-600"><i class="ph-bold ph-trash"></i></button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = rows.reverse().join('');
+
+            const pick = key => sorted.map(m => m[key]).filter(v => v !== null);
+            const span = key => { const v = pick(key); return v.length ? [v[0], v[v.length - 1]] : [null, null]; };
+            const [w0, w1] = span('weight'), [c0, c1] = span('waist'), [h0, h1] = span('hip');
+            const latestBoth = [...sorted].reverse().find(m => m.waist !== null && m.hip !== null);
+            const whr = latestBoth ? (latestBoth.waist / latestBoth.hip).toFixed(2) : null;
+            summary.innerHTML =
+                deltaChip('น้ำหนัก', w0, w1, 'กก.') +
+                deltaChip('รอบเอว', c0, c1, 'ซม.') +
+                deltaChip('รอบสะโพก', h0, h1, 'ซม.') +
+                `<div>
+                    <div class="text-[11px] text-gray-500">สัดส่วนเอว ÷ สะโพก</div>
+                    <div class="text-base font-bold text-gray-800">${whr ?? '–'}</div>
+                    <div class="text-[11px] text-gray-500">ยิ่งต่ำ เอวยิ่งคอดเมื่อเทียบสะโพก</div>
+                </div>`;
+
+            // Keep the protein calculator in step with the latest recorded weight.
+            if (w1 !== null) {
+                document.getElementById('proteinWeight').value = w1;
+                updateProteinCalc();
+            }
+        }
+
+        function exportMeasurementsCsv() {
+            const sorted = [...measurements].sort((a, b) => a.date.localeCompare(b.date));
+            const q = s => `"${String(s).replace(/"/g, '""')}"`;
+            const lines = ['date,weight_kg,waist_cm,hip_cm,note']
+                .concat(sorted.map(m => [m.date, m.weight ?? '', m.waist ?? '', m.hip ?? '', q(m.note || '')].join(',')));
+            const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'body-measurements.csv';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // ---------- Protein calculator ----------
+        function updateProteinCalc() {
+            const w = parseFloat(document.getElementById('proteinWeight').value);
+            const out = document.getElementById('proteinResult');
+            if (!Number.isFinite(w) || w <= 0) { out.textContent = '–'; return; }
+            out.textContent = `${Math.round(w * 1.2)} – ${Math.round(w * 1.5)} กรัม`;
+        }
+
         // Initialize App on Load
         window.onload = function() {
-            setWeeklyPlan(4);
+            loadProgress();
+            measurements = storageGet(STORAGE_KEYS.measurements, []);
+            if (!Array.isArray(measurements)) measurements = [];
+            document.getElementById('mDate').value = localDateStr();
+            setWeeklyPlan(currentPlanFreq);
             renderExercises();
+            renderMeasurements();
+            updateProteinCalc();
         };
     </script>
 </body>
