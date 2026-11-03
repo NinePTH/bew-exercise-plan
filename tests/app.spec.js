@@ -34,20 +34,20 @@ test.describe('section navigation', () => {
             .map(el => el.dataset.panel))]);
 
     test('opens on the workout section by default', async ({ page }) => {
-        expect(await visiblePanels(page)).toEqual(['workout']);
+        await expect.poll(() => visiblePanels(page)).toEqual(['workout']);
         await expect(page.locator('[data-nav=workout]')).toHaveAttribute('aria-current', 'page');
         await expect(page.locator('#measureSection')).toBeHidden();
     });
 
     test('tapping a tab shows only that section and updates the URL', async ({ page }) => {
         await page.click('[data-nav=progress]');
-        expect(await visiblePanels(page)).toEqual(['progress']);
+        await expect.poll(() => visiblePanels(page)).toEqual(['progress']);
         await expect(page).toHaveURL(/#progress$/);
         await expect(page.locator('[data-nav=progress]')).toHaveAttribute('aria-current', 'page');
         await expect(page.locator('[data-nav=workout]')).not.toHaveAttribute('aria-current', 'page');
 
         await page.click('[data-nav=nutrition]');
-        expect(await visiblePanels(page)).toEqual(['nutrition']);
+        await expect.poll(() => visiblePanels(page)).toEqual(['nutrition']);
         await expect(page.locator('#proteinResult')).toBeVisible();
     });
 
@@ -60,7 +60,7 @@ test.describe('section navigation', () => {
 
     test('an unknown hash falls back to workout', async ({ page }) => {
         await page.goto('/index.html#nonsense');
-        expect(await visiblePanels(page)).toEqual(['workout']);
+        await expect.poll(() => visiblePanels(page)).toEqual(['workout']);
     });
 
     test('back button returns to the previous section', async ({ page }) => {

@@ -191,6 +191,8 @@ test.describe('installable / offline', () => {
         await context.setOffline(true);
         await page.reload();
         await expect(page.locator('h1')).toHaveText('Hourglass & Core Sculpt');
+        // Styling still applies, i.e. the Tailwind script came from the offline cache.
+        await expect(page.locator('h1')).toHaveCSS('font-size', '30px');
         await page.click('[data-nav=progress]');
         await page.fill('#mWeight', '50');
         await page.click('#measureForm button[type=submit]');

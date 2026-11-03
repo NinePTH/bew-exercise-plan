@@ -332,6 +332,16 @@
             </div>
         </section>
 
+        <!-- Check-in history -->
+        <section data-panel="progress" class="glass-card rounded-2xl p-5 shadow-sm" id="checkinSection" hidden>
+            <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-1">
+                <i class="ph-fill ph-calendar-check text-rose-500 text-xl"></i>
+                สถิติการเช็กชื่อออกกำลังกาย
+            </h3>
+            <p class="text-xs text-gray-500 mb-3">เช็กชื่อได้ที่ตารางประจำสัปดาห์ในแท็บออกกำลังกาย ระบบจะเก็บประวัติให้อัตโนมัติ</p>
+            <div id="checkinStats"></div>
+        </section>
+
         <!-- Body Measurement Tracker -->
         <section data-panel="progress" class="glass-card rounded-2xl p-5 shadow-sm" id="measureSection" hidden>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
@@ -351,7 +361,7 @@
 
             <form id="measureForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4 items-end text-xs" onsubmit="addMeasurement(event)">
                 <label class="flex flex-col gap-1">วันที่
-                    <input id="mDate" type="date" required class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mDate" type="date" required min="2000-01-01" max="2099-12-31" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
                 </label>
                 <label class="flex flex-col gap-1">น้ำหนัก (กก.)
                     <input id="mWeight" type="number" step="0.1" min="20" max="300" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
@@ -540,7 +550,7 @@
         };
 
         let currentPlanFreq = 4; // Default 4 days/week
-        let selectedDayIndex = 0; // Monday default
+        let selectedDayIndex = (new Date().getDay() + 6) % 7; // today (Mon = 0)
         const checkedDaysState = { mon: false, tue: false, wed: false, thu: false, fri: false, sat: false, sun: false };
 
         // Workout Programs Database
@@ -740,6 +750,13 @@
         function setWeeklyPlan(freq) {
             currentPlanFreq = freq;
             saveProgress();
+            renderPlanButtons();
+            renderDayTracker();
+            renderCheckinStats();
+        }
+
+        function renderPlanButtons() {
+            const freq = currentPlanFreq;
             [3, 4, 5].forEach(num => {
                 const btn = document.getElementById(`planBtn-${num}`);
                 if (num === freq) {
@@ -748,7 +765,6 @@
                     btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100";
                 }
             });
-            renderDayTracker();
         }
 
         // Render Day Tracker & Schedule
@@ -757,20 +773,34 @@
             container.innerHTML = '';
             const plan = schedulePlans[currentPlanFreq];
 
+            const dates = weekDates();
+            const today = localDateStr();
+
             plan.days.forEach((day, index) => {
                 const isChecked = checkedDaysState[day.id];
                 const isSelected = index === selectedDayIndex;
+                const isFuture = dates[index] > today;
                 const card = document.createElement('div');
                 card.className = `flex flex-col justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected ? 'ring-2 ring-rose-400 bg-rose-50/60 border-rose-300' : 'bg-white hover:bg-rose-50/30 border-gray-200'
                 }`;
+                card.tabIndex = 0;
+                card.setAttribute('role', 'button');
+                card.setAttribute('aria-label', `วัน${day.name}: ${day.label}`);
+                card.setAttribute('aria-pressed', String(isSelected));
                 card.onclick = () => selectDay(index);
+                card.onkeydown = e => {
+                    if (e.target === card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); selectDay(index); }
+                };
 
                 card.innerHTML = `
                     <div class="flex items-center justify-between mb-1.5">
                         <span class="text-xs font-bold text-gray-700">${day.short}</span>
-                        <button onclick="event.stopPropagation(); toggleDayCheck('${day.id}')" title="คลิกเพื่อเช็กชื่อว่าทำเสร็จแล้ว" class="w-5 h-5 rounded-full flex items-center justify-center transition ${
-                            isChecked ? 'bg-emerald-500 text-white shadow-sm' : 'bg-gray-100 hover:bg-rose-100 text-gray-400'
+                        <button onclick="event.stopPropagation(); toggleDayCheck('${day.id}')" ${isFuture ? 'disabled' : ''}
+                            title="${isFuture ? 'ยังไม่ถึงวันนี้ เช็กชื่อได้เมื่อถึงวัน' : 'คลิกเพื่อเช็กชื่อว่าทำเสร็จแล้ว'}"
+                            aria-label="เช็กชื่อวัน${day.name}" aria-pressed="${isChecked}"
+                            class="w-5 h-5 rounded-full flex items-center justify-center transition ${
+                            isChecked ? 'bg-emerald-500 text-white shadow-sm' : (isFuture ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-gray-100 hover:bg-rose-100 text-gray-400')
                         }">
                             <i class="ph-bold ph-check text-[10px]"></i>
                         </button>
@@ -798,10 +828,16 @@
             renderDayTracker();
         }
 
+        // A check-in is stored as the real calendar date, so it can build up a history.
         function toggleDayCheck(dayId) {
-            checkedDaysState[dayId] = !checkedDaysState[dayId];
-            saveProgress();
+            rollOverIfNeeded();
+            const date = weekDates()[DAY_IDS.indexOf(dayId)];
+            if (!date || date > localDateStr()) return; // can't check in a day that hasn't happened yet
+            if (checkinDates.has(date)) checkinDates.delete(date); else checkinDates.add(date);
+            saveCheckins();
+            syncCheckedDays();
             renderDayTracker();
+            renderCheckinStats();
         }
 
         function renderSelectedDayBanner() {
@@ -914,6 +950,7 @@
         }
 
         function toggleExerciseDone(exId) {
+            rollOverIfNeeded();
             const program = workoutPrograms[currentTab];
             const target = program.exercises.find(e => e.id === exId);
             if (target) {
@@ -958,8 +995,12 @@
                 if (timeRemaining <= 0) timeRemaining = 45;
                 isTimerRunning = true;
                 document.getElementById('timerStatus').innerText = 'กำลังจับเวลา... หายใจเข้า-ออกลึกๆ';
+                // Count down against a fixed end time: phones throttle intervals when the screen is off.
+                const endAt = Date.now() + timeRemaining * 1000;
                 timerInterval = setInterval(() => {
-                    timeRemaining--;
+                    const left = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
+                    if (left === timeRemaining) return;
+                    timeRemaining = left;
                     document.getElementById('timerDisplay').innerText = formatTime(timeRemaining);
                     if (timeRemaining <= 0) {
                         clearInterval(timerInterval);
@@ -967,7 +1008,7 @@
                         document.getElementById('timerStatus').innerText = 'ครบเวลาแล้ว! ลุยเซตต่อไปได้เลย';
                         updateTimerButtonUI();
                     }
-                }, 1000);
+                }, 250);
             }
             updateTimerButtonUI();
         }
@@ -1039,7 +1080,7 @@
         }
 
         // ---------- Persistence (localStorage, with safe fallbacks) ----------
-        const STORAGE_KEYS = { measurements: 'hg.measurements.v1', progress: 'hg.progress.v1' };
+        const STORAGE_KEYS = { measurements: 'hg.measurements.v1', progress: 'hg.progress.v1', checkins: 'hg.checkins.v1' };
 
         function storageGet(key, fallback) {
             try {
@@ -1070,29 +1111,138 @@
             return localDateStr(m);
         }
 
-        // Exercise ticks reset each day, weekday check-ins reset each week.
+        function isValidIsoDate(s) {
+            if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+            const d = new Date(s + 'T00:00:00');
+            return !isNaN(d) && localDateStr(d) === s;
+        }
+
+        const DAY_IDS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+        // The 7 calendar dates (Mon..Sun) of the week containing `ref`.
+        function weekDates(ref = new Date()) {
+            const [y, m, d] = mondayOfWeekStr(ref).split('-').map(Number);
+            return DAY_IDS.map((_, i) => localDateStr(new Date(y, m - 1, d + i)));
+        }
+
+        // ---------- Check-in history (one entry per calendar date trained) ----------
+        let checkinDates = new Set();
+
+        function saveCheckins() {
+            storageSet(STORAGE_KEYS.checkins, [...checkinDates].sort());
+        }
+
+        // The planner's ticks are just this week's slice of the history.
+        function syncCheckedDays() {
+            const dates = weekDates();
+            DAY_IDS.forEach((id, i) => { checkedDaysState[id] = checkinDates.has(dates[i]); });
+        }
+
+        // ---------- Daily exercise ticks & plan length ----------
+        let progressDay = localDateStr(); // the day the in-memory exercise ticks belong to
+
         function saveProgress() {
             const exDone = {};
             Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { if (ex.done) exDone[ex.id] = true; }));
-            storageSet(STORAGE_KEYS.progress, {
-                date: localDateStr(),
-                week: mondayOfWeekStr(),
-                freq: currentPlanFreq,
-                exDone,
-                days: checkedDaysState
-            });
+            storageSet(STORAGE_KEYS.progress, { date: progressDay, freq: currentPlanFreq, exDone });
+        }
+
+        // If the page stayed open past midnight, drop yesterday's ticks before touching anything.
+        function rollOverIfNeeded() {
+            const today = localDateStr();
+            if (today === progressDay) return;
+            const dateInput = document.getElementById('mDate');
+            if (dateInput.value === progressDay) dateInput.value = today; // keep a date the user picked
+            progressDay = today;
+            selectedDayIndex = (new Date().getDay() + 6) % 7;
+            Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = false; }));
+            saveProgress();
+            syncCheckedDays();
+            renderDayTracker();
+            renderExercises();
+            renderCheckinStats();
         }
 
         function loadProgress() {
+            const stored = storageGet(STORAGE_KEYS.checkins, []);
+            checkinDates = new Set((Array.isArray(stored) ? stored : []).filter(isValidIsoDate));
+
             const saved = storageGet(STORAGE_KEYS.progress, null);
-            if (!saved) return;
-            if (schedulePlans[saved.freq]) currentPlanFreq = saved.freq;
-            if (saved.week === mondayOfWeekStr() && saved.days) {
-                Object.keys(checkedDaysState).forEach(k => { checkedDaysState[k] = !!saved.days[k]; });
+            if (saved && typeof saved === 'object') {
+                if (schedulePlans[saved.freq]) currentPlanFreq = saved.freq;
+                // Older versions kept this week's ticks as { mon: true, ... }; fold them into the history once.
+                if (saved.days && saved.week === mondayOfWeekStr()) {
+                    const dates = weekDates(), today = localDateStr();
+                    DAY_IDS.forEach((id, i) => { if (saved.days[id] && dates[i] <= today) checkinDates.add(dates[i]); });
+                    saveCheckins();
+                }
+                if (saved.date === localDateStr() && saved.exDone) {
+                    Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = !!saved.exDone[ex.id]; }));
+                }
             }
-            if (saved.date === localDateStr() && saved.exDone) {
-                Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = !!saved.exDone[ex.id]; }));
+            syncCheckedDays();
+        }
+
+        // ---------- Check-in stats (Progress tab) ----------
+        const STREAK_MIN_DAYS = 3; // the lightest plan; a week counts toward the streak at 3+ check-ins
+        const HISTORY_WEEKS = 8;
+
+        function weekCount(dates) {
+            return dates.filter(d => checkinDates.has(d)).length;
+        }
+
+        function computeStreak() {
+            const now = new Date();
+            const shift = w => new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7 * w);
+            let streak = 0, w = 0;
+            // The current week is still in progress, so it only adds to the streak once it qualifies.
+            if (weekCount(weekDates(shift(0))) >= STREAK_MIN_DAYS) streak++;
+            w = 1;
+            while (weekCount(weekDates(shift(w))) >= STREAK_MIN_DAYS) { streak++; w++; }
+            return streak;
+        }
+
+        function renderCheckinStats() {
+            const el = document.getElementById('checkinStats');
+            if (!el) return;
+            const now = new Date(), today = localDateStr();
+            const thisWeek = weekCount(weekDates());
+            const streak = computeStreak();
+
+            const weeks = [];
+            for (let w = HISTORY_WEEKS - 1; w >= 0; w--) {
+                weeks.push(weekDates(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7 * w)));
             }
+            const dayShort = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
+            let grid = '<div class="grid gap-1" style="grid-template-columns: auto repeat(' + HISTORY_WEEKS + ', minmax(0, 1fr));">';
+            DAY_IDS.forEach((_, row) => {
+                grid += `<span class="text-[10px] text-gray-500 pr-1 leading-4">${dayShort[row]}</span>`;
+                weeks.forEach(dates => {
+                    const d = dates[row];
+                    const done = checkinDates.has(d), future = d > today;
+                    const cls = future ? 'bg-transparent border border-dashed border-gray-200'
+                        : done ? 'bg-rose-500' : 'bg-gray-100';
+                    grid += `<span data-day="${d}" class="h-4 rounded-sm ${cls} ${d === today ? 'ring-2 ring-offset-1 ring-gray-400' : ''}"
+                        title="${d}${done ? ' · เช็กชื่อแล้ว' : ''}" aria-label="${d}${done ? ' เช็กชื่อแล้ว' : (future ? ' ยังไม่ถึง' : ' ไม่ได้เช็กชื่อ')}"></span>`;
+                });
+            });
+            grid += '</div>';
+
+            el.innerHTML = `
+                <div class="grid grid-cols-3 gap-x-4 mb-4 py-3 border-y border-rose-100">
+                    <div><div class="text-[11px] text-gray-500">สัปดาห์นี้</div>
+                        <div class="text-base font-bold text-gray-800" id="statWeek">${thisWeek} / ${currentPlanFreq} <span class="text-[11px] font-normal text-gray-500">วัน</span></div></div>
+                    <div><div class="text-[11px] text-gray-500">สัปดาห์ติดต่อกัน (≥ ${STREAK_MIN_DAYS} วัน)</div>
+                        <div class="text-base font-bold text-gray-800" id="statStreak">${streak} <span class="text-[11px] font-normal text-gray-500">สัปดาห์</span></div></div>
+                    <div><div class="text-[11px] text-gray-500">เช็กชื่อทั้งหมด</div>
+                        <div class="text-base font-bold text-gray-800" id="statTotal">${checkinDates.size} <span class="text-[11px] font-normal text-gray-500">วัน</span></div></div>
+                </div>
+                <div class="text-[11px] text-gray-500 mb-1.5">${HISTORY_WEEKS} สัปดาห์ล่าสุด (ซ้าย → ขวา = เก่า → ใหม่)</div>
+                <div class="max-w-md">${grid}</div>
+                <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                    <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-rose-500"></span>เช็กชื่อแล้ว</span>
+                    <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-gray-100"></span>ไม่ได้เช็กชื่อ</span>
+                </div>`;
         }
 
         // ---------- Body Measurement Tracker ----------
@@ -1123,8 +1273,15 @@
                 err.classList.remove('hidden');
                 return;
             }
+            // Same rules as on load, so an entry that saves now can't be dropped on the next reload.
+            const clean = sanitizeEntry(entry);
+            if (!clean) {
+                err.textContent = 'วันที่หรือค่าที่กรอกไม่ถูกต้อง (เช่น ปีต้องเป็นตัวเลข 4 หลัก)';
+                err.classList.remove('hidden');
+                return;
+            }
             err.classList.add('hidden');
-            measurements.push(entry);
+            measurements.push(clean);
             if (!storageSet(STORAGE_KEYS.measurements, measurements)) {
                 err.textContent = 'บันทึกลงเบราว์เซอร์ไม่ได้ (อาจปิดการเก็บข้อมูลหรืออยู่ในโหมดส่วนตัว) ข้อมูลจะหายเมื่อรีเฟรช — กดดาวน์โหลด CSV เก็บไว้';
                 err.classList.remove('hidden');
@@ -1133,9 +1290,27 @@
             renderMeasurements();
         }
 
+        let lastDeleted = null;
+        let lastSyncedWeight = null;
+
         function deleteMeasurement(id) {
+            lastDeleted = measurements.find(m => m.id === id) || null;
             measurements = measurements.filter(m => m.id !== id);
             storageSet(STORAGE_KEYS.measurements, measurements);
+            renderMeasurements();
+            if (lastDeleted) {
+                const msg = document.getElementById('backupMsg');
+                msg.className = 'text-xs mt-2 min-h-[1rem] text-gray-700';
+                msg.innerHTML = `ลบรายการวันที่ ${escapeHtml(lastDeleted.date)} แล้ว · <button id="undoDeleteBtn" onclick="undoDelete()" class="font-semibold text-rose-600 underline">เลิกทำ</button>`;
+            }
+        }
+
+        function undoDelete() {
+            if (!lastDeleted) return;
+            measurements.push(lastDeleted);
+            storageSet(STORAGE_KEYS.measurements, measurements);
+            setBackupMsg(`กู้คืนรายการวันที่ ${lastDeleted.date} แล้ว`, false);
+            lastDeleted = null;
             renderMeasurements();
         }
 
@@ -1169,7 +1344,9 @@
 
             const firstDate = new Date(sorted[0].date + 'T00:00:00');
             const rows = sorted.map(m => {
-                const week = Math.floor((new Date(m.date + 'T00:00:00') - firstDate) / (7 * 86400000)) + 1;
+                // Round the day count so a 23/25-hour daylight-saving day can't shift the week.
+                const days = Math.round((new Date(m.date + 'T00:00:00') - firstDate) / 86400000);
+                const week = Math.floor(days / 7) + 1;
                 return `<tr class="border-b border-gray-100">
                     <td class="py-2 pr-2 font-medium text-gray-700">สัปดาห์ที่ ${week}</td>
                     <td class="py-2 pr-2">${escapeHtml(m.date)}</td>
@@ -1199,8 +1376,10 @@
 
             renderCharts(sorted);
 
-            // Keep the protein calculator in step with the latest recorded weight.
-            if (w1 !== null) {
+            // Keep the protein calculator in step with the latest recorded weight, but only when that
+            // weight changes, so a value the user typed in isn't overwritten by a delete or import.
+            if (w1 !== null && w1 !== lastSyncedWeight) {
+                lastSyncedWeight = w1;
                 document.getElementById('proteinWeight').value = w1;
                 updateProteinCalc();
             }
@@ -1281,13 +1460,15 @@
                 <figcaption class="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
                     <span class="inline-block w-3 h-0.5 rounded" style="background:${metric.color}"></span>${metric.label} (${metric.unit})
                 </figcaption>
-                <svg viewBox="0 0 ${CHART_W} ${CHART_H}" class="w-full h-auto" role="img" aria-label="${metric.label}: ${fmt(pts[0].v)} ถึง ${fmt(last.v)} ${metric.unit} จาก ${pts.length} ครั้ง">
+                <div class="relative">
+                <svg viewBox="0 0 ${CHART_W} ${CHART_H}" class="w-full h-auto block" role="img" aria-label="${metric.label}: ${fmt(pts[0].v)} ถึง ${fmt(last.v)} ${metric.unit} จาก ${pts.length} ครั้ง">
                     ${grid}${xLabels}
                     <polyline points="${path}" fill="none" stroke="${metric.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
                     ${dots}
                     <text x="${(px(last) + 9).toFixed(1)}" y="${(py(last.v) + 4).toFixed(1)}" font-size="11" font-weight="600" fill="#0b0b0b">${fmt(last.v)}</text>
                 </svg>
                 <div class="chart-tip absolute pointer-events-none bg-gray-900 text-white text-[11px] rounded-md px-2 py-1 whitespace-nowrap" hidden></div>
+                </div>
             </figure>`;
         }
 
@@ -1330,10 +1511,14 @@
             URL.revokeObjectURL(a.href);
         }
 
+        // version 2 adds check-in history and plan length; version 1 files (measurements only) still import.
         function exportMeasurementsJson() {
-            const payload = { app: 'hourglass-balance', version: 1, exportedAt: new Date().toISOString(), measurements };
+            const payload = {
+                app: 'hourglass-balance', version: 2, exportedAt: new Date().toISOString(),
+                measurements, checkins: [...checkinDates].sort(), planFreq: currentPlanFreq
+            };
             downloadText(`hourglass-backup-${localDateStr()}.json`, 'application/json', JSON.stringify(payload, null, 2));
-            setBackupMsg(`สำรองข้อมูล ${measurements.length} รายการแล้ว`, false);
+            setBackupMsg(`สำรองข้อมูล ${measurements.length} รายการ · เช็กชื่อ ${checkinDates.size} วัน แล้ว`, false);
         }
 
         // Minimal CSV parser: quoted fields, "" escapes, CRLF/LF, optional BOM.
@@ -1365,9 +1550,7 @@
         function sanitizeEntry(raw) {
             if (!raw || typeof raw !== 'object') return null;
             const date = typeof raw.date === 'string' ? raw.date.trim() : '';
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-            const parsed = new Date(date + 'T00:00:00');
-            if (isNaN(parsed) || localDateStr(parsed) !== date) return null;
+            if (!isValidIsoDate(date)) return null;
 
             const num = (v, min, max) => {
                 if (v === null || v === undefined || v === '') return null;
@@ -1386,21 +1569,26 @@
         }
 
         function recordsFromImport(name, text) {
+            if (!text.replace(/^﻿/, '').trim()) throw new Error('ไฟล์ว่างเปล่า');
             if (/\.csv$/i.test(name)) {
                 const [header, ...rows] = parseCsv(text);
-                if (!header) return [];
+                if (!header) throw new Error('ไฟล์ว่างเปล่า');
                 const col = h => header.map(x => x.trim().toLowerCase()).indexOf(h);
                 const idx = { date: col('date'), weight: col('weight_kg'), waist: col('waist_cm'), hip: col('hip_cm'), note: col('note') };
                 if (idx.date < 0) throw new Error('ไม่พบคอลัมน์ date ในไฟล์ CSV');
                 const get = (r, i) => (i >= 0 && i < r.length ? r[i] : '');
-                return rows.map(r => ({
+                return { records: rows.map(r => ({
                     date: get(r, idx.date), weight: get(r, idx.weight), waist: get(r, idx.waist), hip: get(r, idx.hip), note: get(r, idx.note)
-                }));
+                })), checkins: [], planFreq: null };
             }
             const data = JSON.parse(text);
             const list = Array.isArray(data) ? data : data && data.measurements;
             if (!Array.isArray(list)) throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
-            return list;
+            return {
+                records: list,
+                checkins: data && Array.isArray(data.checkins) ? data.checkins : [],
+                planFreq: data && schedulePlans[data.planFreq] ? data.planFreq : null
+            };
         }
 
         async function importMeasurementsFile(input) {
@@ -1409,7 +1597,16 @@
             if (!file) return;
             if (file.size > 1024 * 1024) { setBackupMsg('ไฟล์ใหญ่เกินไป (สูงสุด 1 MB)', true); return; }
             try {
-                const records = recordsFromImport(file.name, await file.text());
+                const { records, checkins, planFreq } = recordsFromImport(file.name, await file.text());
+                const today = localDateStr();
+                let checkinsAdded = 0;
+                checkins.forEach(d => {
+                    if (isValidIsoDate(d) && d <= today && !checkinDates.has(d)) { checkinDates.add(d); checkinsAdded++; }
+                });
+                if (checkinsAdded) { saveCheckins(); syncCheckedDays(); renderDayTracker(); }
+                if (planFreq) setWeeklyPlan(planFreq);
+                renderCheckinStats();
+
                 const ids = new Set(measurements.map(m => m.id));
                 const sig = m => [m.date, m.weight, m.waist, m.hip, m.note].join('|');
                 const sigs = new Set(measurements.map(sig));
@@ -1426,7 +1623,9 @@
                 if (added > 0 && !storageSet(STORAGE_KEYS.measurements, measurements)) {
                     setBackupMsg('นำเข้าแล้ว แต่บันทึกลงเบราว์เซอร์ไม่ได้ ข้อมูลจะหายเมื่อรีเฟรช', true);
                 } else {
-                    setBackupMsg(`นำเข้า ${added} รายการ` + (skipped ? ` (ข้าม ${skipped} รายการที่ซ้ำหรือไม่ถูกต้อง)` : ''), added === 0 && records.length > 0);
+                    setBackupMsg(`นำเข้า ${added} รายการ` + (skipped ? ` (ข้าม ${skipped} รายการที่ซ้ำหรือไม่ถูกต้อง)` : '')
+                        + (checkinsAdded ? ` · เช็กชื่อ ${checkinsAdded} วัน` : ''),
+                        added === 0 && checkinsAdded === 0 && records.length > 0);
                 }
                 renderMeasurements();
             } catch (e) {
@@ -1472,18 +1671,43 @@
             });
         }
 
-        // Initialize App on Load
-        window.onload = function() {
+        // Coming back to the app (e.g. next morning) moves ticks and the planner to the new day.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') rollOverIfNeeded();
+        });
+
+        function loadMeasurements() {
+            const stored = storageGet(STORAGE_KEYS.measurements, []);
+            measurements = (Array.isArray(stored) ? stored : []).map(sanitizeEntry).filter(Boolean);
+        }
+
+        // Another open copy (e.g. the installed app and a browser tab) saved something: reload it here,
+        // so this copy's next save doesn't overwrite it with stale data. Render only; saving here would echo back.
+        window.addEventListener('storage', e => {
+            if (e.key !== null && !Object.values(STORAGE_KEYS).includes(e.key)) return;
+            loadProgress();
+            loadMeasurements();
+            renderPlanButtons();
+            renderDayTracker();
+            renderExercises();
+            renderMeasurements();
+            renderCheckinStats();
+        });
+
+        // Initialize as soon as the DOM is ready; don't wait for fonts and icons to finish loading.
+        function init() {
             showSectionFromHash(false);
             loadProgress();
-            measurements = storageGet(STORAGE_KEYS.measurements, []);
-            if (!Array.isArray(measurements)) measurements = [];
+            loadMeasurements();
             document.getElementById('mDate').value = localDateStr();
             setWeeklyPlan(currentPlanFreq);
             renderExercises();
             renderMeasurements();
             updateProteinCalc();
-        };
+        }
+
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+        else init();
     </script>
 </body>
 </html>

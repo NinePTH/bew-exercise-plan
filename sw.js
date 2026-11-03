@@ -1,5 +1,5 @@
 // Offline support. Bump CACHE when the precache list changes.
-const CACHE = 'hg-v1';
+const CACHE = 'hg-v2';
 const PRECACHE = [
     './',
     './index.html',
@@ -47,30 +47,32 @@ self.addEventListener('fetch', event => {
 
     // Pages: network first so updates show up, cached copy when offline.
     if (req.mode === 'navigate') {
-        event.respondWith(
-            fetch(req)
-                .then(res => {
-                    const copy = res.clone();
-                    caches.open(CACHE).then(c => c.put('./index.html', copy));
-                    return res;
-                })
-                .catch(() => caches.match('./index.html'))
-        );
+        // cache: 'no-cache' revalidates with the server, so a fresh deploy shows up straight away
+        // instead of after the browser's HTTP cache expires.
+        let saved = Promise.resolve();
+        const network = fetch(req, { cache: 'no-cache' }).then(res => {
+            // Only a real page may replace the offline copy, never a 404 or error page.
+            // Clone before handing the response to the page, which consumes its body.
+            if (res.ok) {
+                const copy = res.clone();
+                saved = caches.open(CACHE).then(c => c.put('./index.html', copy));
+            }
+            return res;
+        });
+        event.respondWith(network.catch(() => caches.match('./index.html')));
+        event.waitUntil(network.then(() => saved).catch(() => {}));
         return;
     }
 
     // Everything else: serve from cache, refresh it in the background.
-    event.respondWith(
-        caches.open(CACHE).then(cache =>
-            cache.match(req).then(cached => {
-                const refresh = fetch(req)
-                    .then(res => {
-                        if (res.ok || res.type === 'opaque') cache.put(req, res.clone());
-                        return res;
-                    })
-                    .catch(() => cached);
-                return cached || refresh;
-            })
-        )
+    const refresh = caches.open(CACHE).then(cache =>
+        fetch(req).then(res => {
+            if (res.ok || res.type === 'opaque') return cache.put(req, res.clone()).then(() => res);
+            return res;
+        })
     );
+    event.respondWith(
+        caches.match(req).then(cached => cached || refresh)
+    );
+    event.waitUntil(refresh.catch(() => {}));
 });
