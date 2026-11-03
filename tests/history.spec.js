@@ -118,9 +118,9 @@ test.describe('midnight rollover', () => {
         await page.clock.fastForward('05:00');
         await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
         await expect(page.locator('#completedExercisesCount')).toHaveText('0');
-        const saved = await page.evaluate(k => JSON.parse(localStorage.getItem(k)), PROGRESS_KEY);
-        expect(saved.date).toBe('2026-11-05');
-        expect(saved.exDone).toEqual({});
+        // Yesterday's tick stays in the history; today starts empty.
+        const log = await page.evaluate(() => JSON.parse(localStorage.getItem('hg.exlog.v1')));
+        expect(log).toEqual({ '2026-11-04': ['ex1'] });
     });
 
     test('ticking after midnight without switching away also rolls over first', async ({ page }) => {
@@ -140,7 +140,7 @@ test.describe('backup includes check-ins and plan length', () => {
         await page.click('[data-nav=progress]');
         const [download] = await Promise.all([page.waitForEvent('download'), page.click('#exportJsonBtn')]);
         const data = JSON.parse(fs.readFileSync(await download.path(), 'utf8'));
-        expect(data.version).toBe(2);
+        expect(data.version).toBe(3);
         expect(data.checkins).toEqual(['2026-10-26', '2026-10-28', '2026-11-02']);
         expect(data.planFreq).toBe(5);
 

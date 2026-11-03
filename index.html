@@ -10,55 +10,32 @@
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="manifest" href="manifest.webmanifest">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Applies a saved light/dark choice before first paint (no flash). -->
+    <script>
+        try {
+            var savedTheme = localStorage.getItem('hg.theme');
+            if (savedTheme === 'light' || savedTheme === 'dark') document.documentElement.dataset.theme = savedTheme;
+        } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-            background-color: #fdf8f6;
-            color: #1f2937;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(244, 63, 94, 0.12);
-        }
-        /* Tailwind's display utilities (grid, flex) beat the [hidden] attribute, so enforce it for panels. */
-        [data-panel][hidden] {
-            display: none !important;
-        }
-        .active-tab {
-            background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
-        }
-        .breathing-circle {
-            transition: all 1s ease-in-out;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #fdf8f6;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #fda4af;
-            border-radius: 9999px;
-        }
-    </style>
 </head>
 <body class="min-h-screen pb-28 md:pb-16">
 
     <!-- Header / Profile Banner -->
-    <header class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
+    <header class="keep-light bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
         <div class="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium mb-2">
-                    <i class="ph-fill ph-sparkle text-amber-200"></i>
-                    <span>Inverted Triangle Body Balance</span>
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">
+                        <i class="ph-fill ph-sparkle text-amber-200"></i>
+                        <span>Inverted Triangle Body Balance</span>
+                    </div>
+                    <!-- Theme: follows the device (auto) → light → dark -->
+                    <button id="themeBtn" type="button" onclick="cycleTheme()" class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium transition">
+                        <i id="themeIcon" class="ph-fill ph-circle-half"></i><span id="themeLabel">อัตโนมัติ</span>
+                    </button>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Hourglass & Core Sculpt</h1>
                 <p class="text-rose-100 text-sm mt-1">แผนปั้นสะโพก กระชับเอวคอด และเฟิร์มไหล่สวย (สำหรับทำที่ห้องพัก & สวน)</p>
@@ -86,7 +63,7 @@
     <main class="max-w-5xl mx-auto px-4 sm:px-6 -mt-8 relative z-20 space-y-6">
 
         <!-- Section navigation: fixed bottom bar on phones, sticky bar under the header on larger screens -->
-        <nav aria-label="เมนูหลัก" class="fixed bottom-0 inset-x-0 z-30 md:sticky md:top-2 md:inset-x-auto bg-white/95 backdrop-blur border-t border-rose-100 md:border md:rounded-2xl md:shadow-sm px-2 py-2 grid grid-cols-3 gap-2" id="sectionNav">
+        <nav aria-label="เมนูหลัก" class="fixed bottom-0 inset-x-0 z-30 md:sticky md:top-2 md:inset-x-auto bg-surface/95 backdrop-blur border-t border-rose-100 md:border md:rounded-2xl md:shadow-sm px-2 py-2 grid grid-cols-3 gap-2" id="sectionNav">
             <a href="#workout" data-nav="workout" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 py-2 rounded-xl text-xs md:text-sm font-semibold transition">
                 <i class="ph-fill ph-barbell text-xl md:text-lg"></i><span>ออกกำลังกาย</span>
             </a>
@@ -99,6 +76,9 @@
         </nav>
 
         <!-- Top Dashboard Row: Weekly Tracker & Equipment -->
+        <!-- Weekly measurement reminder; rendered by JS, and takes no space while empty -->
+        <div data-panel="workout" id="reminderBanner" class="empty:hidden"></div>
+
         <div data-panel="workout" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <!-- Weekly Habit Tracker -->
             <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm">
@@ -130,7 +110,7 @@
             </div>
 
             <!-- Equipment & Golden Rules Summary -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between bg-gradient-to-br from-white to-rose-50/50">
+            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between bg-gradient-to-br from-surface to-rose-50/50">
                 <div>
                     <h2 class="font-bold text-gray-800 flex items-center gap-2 mb-2">
                         <i class="ph-fill ph-barbell text-rose-500 text-xl"></i>
@@ -359,21 +339,40 @@
                 <p class="border-l-2 border-rose-300 pl-3"><strong class="text-rose-800">น้ำหนักตัว:</strong> ชั่งสัปดาห์ละ 1 ครั้ง เวลาเดิม เพื่อดูแนวโน้มภาพรวม</p>
             </div>
 
+            <!-- Weekly reminder: a repeating calendar event (works with the app closed) -->
+            <div class="mb-5 text-xs text-gray-600">
+                <div class="flex flex-wrap items-center gap-2">
+                    <i class="ph-fill ph-bell-ringing text-rose-500 text-base"></i>
+                    <label for="remDay">เตือนวัดสัดส่วนทุกวัน</label>
+                    <select id="remDay" onchange="saveReminderSettings()" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
+                        <option value="0">จันทร์</option><option value="1">อังคาร</option><option value="2">พุธ</option>
+                        <option value="3">พฤหัสบดี</option><option value="4">ศุกร์</option><option value="5">เสาร์</option><option value="6">อาทิตย์</option>
+                    </select>
+                    <label for="remTime">เวลา</label>
+                    <input id="remTime" type="time" value="07:00" onchange="saveReminderSettings()" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
+                    <button type="button" id="remIcsBtn" onclick="downloadReminderIcs()" class="px-3 py-1.5 bg-gray-100 hover:bg-rose-50 text-gray-700 rounded-lg font-medium transition flex items-center gap-1">
+                        <i class="ph-bold ph-calendar-plus"></i> เพิ่มลงปฏิทิน (.ics)
+                    </button>
+                </div>
+                <p class="text-[11px] text-gray-500 mt-1.5">เปิดไฟล์ที่ได้ด้วยแอปปฏิทินในมือถือ ปฏิทินจะแจ้งเตือนทุกสัปดาห์แม้ไม่ได้เปิดแอปนี้ · ในแอปจะขึ้นเตือนเองเมื่อไม่ได้วัดเกิน 7 วัน</p>
+                <p id="reminderMsg" role="status" aria-live="polite" class="text-[11px] text-emerald-700 mt-1 min-h-[1rem]"></p>
+            </div>
+
             <form id="measureForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4 items-end text-xs" onsubmit="addMeasurement(event)">
                 <label class="flex flex-col gap-1">วันที่
-                    <input id="mDate" type="date" required min="2000-01-01" max="2099-12-31" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mDate" type="date" required min="2000-01-01" max="2099-12-31" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
                 <label class="flex flex-col gap-1">น้ำหนัก (กก.)
-                    <input id="mWeight" type="number" step="0.1" min="20" max="300" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mWeight" type="number" step="0.1" min="20" max="300" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
                 <label class="flex flex-col gap-1">รอบเอว (ซม.)
-                    <input id="mWaist" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mWaist" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
                 <label class="flex flex-col gap-1">รอบสะโพก (ซม.)
-                    <input id="mHip" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mHip" type="number" step="0.1" min="20" max="250" inputmode="decimal" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
                 <label class="flex flex-col gap-1 col-span-2 md:col-span-1">หมายเหตุ / ความรู้สึก
-                    <input id="mNote" type="text" maxlength="120" placeholder="เช่น เริ่มต้นโปรแกรม" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-white">
+                    <input id="mNote" type="text" maxlength="120" placeholder="เช่น เริ่มต้นโปรแกรม" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
                 <button type="submit" class="col-span-2 md:col-span-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg font-semibold transition">บันทึก</button>
             </form>
@@ -423,7 +422,7 @@
                     <h4 class="font-bold text-amber-900 mb-2">1. โปรตีนที่ควรได้รับต่อวัน</h4>
                     <p class="text-amber-900 mb-3">คนเริ่มออกกำลังกายและต้องการกระชับสัดส่วน แนะนำ <strong>1.2 – 1.5 กรัม ต่อน้ำหนักตัว 1 กก.</strong></p>
                     <label class="flex items-center gap-2 mb-2">น้ำหนักของคุณ
-                        <input id="proteinWeight" type="number" step="0.1" min="20" max="300" value="50" inputmode="decimal" oninput="updateProteinCalc()" class="w-20 border border-amber-200 rounded-lg px-2 py-1 bg-white">
+                        <input id="proteinWeight" type="number" step="0.1" min="20" max="300" value="50" inputmode="decimal" oninput="updateProteinCalc()" class="w-20 border border-amber-200 rounded-lg px-2 py-1 bg-surface">
                         กก.
                     </label>
                     <div class="mb-3">
@@ -782,7 +781,7 @@
                 const isFuture = dates[index] > today;
                 const card = document.createElement('div');
                 card.className = `flex flex-col justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
-                    isSelected ? 'ring-2 ring-rose-400 bg-rose-50/60 border-rose-300' : 'bg-white hover:bg-rose-50/30 border-gray-200'
+                    isSelected ? 'ring-2 ring-rose-400 bg-rose-50/60 border-rose-300' : 'bg-surface hover:bg-rose-50/30 border-gray-200'
                 }`;
                 card.tabIndex = 0;
                 card.setAttribute('role', 'button');
@@ -861,7 +860,7 @@
                         <span class="font-bold text-rose-900"><i class="ph-fill ph-calendar-star text-rose-500"></i> แผนของวัน${day.name}: ${day.label}</span>
                         <p class="text-rose-700 mt-0.5">${plan.rule} — <em>หากวันนี้ยุ่งหรือเหนื่อย สามารถสลับไปกดแท็บ <strong>"โหมดวันยุ่ง (15–20 นาที)"</strong> แทนได้เลย!</em></p>
                     </div>
-                    <button onclick="switchTab('quick_busy')" class="px-3 py-1.5 bg-white border border-rose-200 text-rose-600 rounded-lg font-semibold shrink-0 hover:bg-rose-100 transition">
+                    <button onclick="switchTab('quick_busy')" class="px-3 py-1.5 bg-surface border border-rose-200 text-rose-600 rounded-lg font-semibold shrink-0 hover:bg-rose-100 transition">
                         สลับเป็นโหมดวันยุ่ง 15 นาที
                     </button>
                 `;
@@ -892,7 +891,7 @@
                     <h3 class="font-bold text-rose-900 text-base">${program.title}</h3>
                     <p class="text-xs text-rose-700 mt-0.5">${program.subtitle}</p>
                 </div>
-                <span class="self-start sm:self-center px-3 py-1 bg-white text-rose-600 border border-rose-200 rounded-full text-xs font-semibold shadow-sm shrink-0">
+                <span class="self-start sm:self-center px-3 py-1 bg-surface text-rose-600 border border-rose-200 rounded-full text-xs font-semibold shadow-sm shrink-0">
                     ${program.tag}
                 </span>
             `;
@@ -905,7 +904,7 @@
                 card.className = `rounded-2xl p-4 border transition-all flex flex-col justify-between ${
                     ex.done 
                     ? 'bg-emerald-50/40 border-emerald-200' 
-                    : 'bg-white border-gray-100 shadow-sm hover:border-rose-200'
+                    : 'bg-surface border-gray-100 shadow-sm hover:border-rose-200'
                 }`;
 
                 card.innerHTML = `
@@ -953,11 +952,14 @@
             rollOverIfNeeded();
             const program = workoutPrograms[currentTab];
             const target = program.exercises.find(e => e.id === exId);
-            if (target) {
-                target.done = !target.done;
-                saveProgress();
-                renderExercises();
-            }
+            if (!target) return;
+            const ids = new Set(exerciseLog[progressDay] || []);
+            if (ids.has(exId)) ids.delete(exId); else ids.add(exId);
+            if (ids.size) exerciseLog[progressDay] = [...ids]; else delete exerciseLog[progressDay];
+            saveExerciseLog();
+            syncExerciseTicks();
+            renderExercises();
+            renderCheckinStats();
         }
 
         function updateTotalCompletedCount() {
@@ -1080,7 +1082,10 @@
         }
 
         // ---------- Persistence (localStorage, with safe fallbacks) ----------
-        const STORAGE_KEYS = { measurements: 'hg.measurements.v1', progress: 'hg.progress.v1', checkins: 'hg.checkins.v1' };
+        const STORAGE_KEYS = {
+            measurements: 'hg.measurements.v1', progress: 'hg.progress.v1', checkins: 'hg.checkins.v1',
+            exlog: 'hg.exlog.v1', reminder: 'hg.reminder.v1'
+        };
 
         function storageGet(key, fallback) {
             try {
@@ -1138,16 +1143,41 @@
             DAY_IDS.forEach((id, i) => { checkedDaysState[id] = checkinDates.has(dates[i]); });
         }
 
-        // ---------- Daily exercise ticks & plan length ----------
-        let progressDay = localDateStr(); // the day the in-memory exercise ticks belong to
+        // ---------- Exercise log (which exercises were ticked on which date) ----------
+        // { 'YYYY-MM-DD': ['ex1', 'ex4'] }. Today's ticks on the exercise cards are today's slice of it.
+        let exerciseLog = {};
+        let progressDay = localDateStr(); // the day the exercise cards currently show
 
-        function saveProgress() {
-            const exDone = {};
-            Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { if (ex.done) exDone[ex.id] = true; }));
-            storageSet(STORAGE_KEYS.progress, { date: progressDay, freq: currentPlanFreq, exDone });
+        const EXERCISES_BY_ID = Object.fromEntries(
+            Object.values(workoutPrograms).flatMap(p => p.exercises.map(ex => [ex.id, ex])));
+
+        // Keeps only valid past-or-today dates and known exercise ids.
+        function cleanExerciseLog(raw) {
+            const out = {}, today = localDateStr();
+            if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+            for (const [date, ids] of Object.entries(raw)) {
+                if (!isValidIsoDate(date) || date > today || !Array.isArray(ids)) continue;
+                const known = [...new Set(ids.filter(id => typeof id === 'string' && EXERCISES_BY_ID[id]))];
+                if (known.length) out[date] = known;
+            }
+            return out;
         }
 
-        // If the page stayed open past midnight, drop yesterday's ticks before touching anything.
+        function saveExerciseLog() {
+            storageSet(STORAGE_KEYS.exlog, exerciseLog);
+        }
+
+        function syncExerciseTicks() {
+            const ids = new Set(exerciseLog[progressDay] || []);
+            Object.values(EXERCISES_BY_ID).forEach(ex => { ex.done = ids.has(ex.id); });
+        }
+
+        // ---------- Plan length ----------
+        function saveProgress() {
+            storageSet(STORAGE_KEYS.progress, { freq: currentPlanFreq });
+        }
+
+        // If the page stayed open past midnight, move to the new day before touching anything.
         function rollOverIfNeeded() {
             const today = localDateStr();
             if (today === progressDay) return;
@@ -1155,12 +1185,12 @@
             if (dateInput.value === progressDay) dateInput.value = today; // keep a date the user picked
             progressDay = today;
             selectedDayIndex = (new Date().getDay() + 6) % 7;
-            Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = false; }));
-            saveProgress();
+            syncExerciseTicks();
             syncCheckedDays();
             renderDayTracker();
             renderExercises();
             renderCheckinStats();
+            renderReminderBanner();
         }
 
         function loadProgress() {
@@ -1176,11 +1206,20 @@
                     DAY_IDS.forEach((id, i) => { if (saved.days[id] && dates[i] <= today) checkinDates.add(dates[i]); });
                     saveCheckins();
                 }
-                if (saved.date === localDateStr() && saved.exDone) {
-                    Object.values(workoutPrograms).forEach(p => p.exercises.forEach(ex => { ex.done = !!saved.exDone[ex.id]; }));
-                }
             }
+
+            exerciseLog = cleanExerciseLog(storageGet(STORAGE_KEYS.exlog, {}));
+            // Older versions kept one day's ticks as { date, exDone: { ex1: true } }; fold them into the log once.
+            if (saved && saved.exDone && typeof saved.exDone === 'object') {
+                const ids = Object.keys(saved.exDone).filter(id => saved.exDone[id]);
+                const merged = cleanExerciseLog({ [saved.date]: [...(exerciseLog[saved.date] || []), ...ids] });
+                Object.assign(exerciseLog, merged);
+                saveExerciseLog();
+                saveProgress(); // rewrite without the old fields
+            }
+
             syncCheckedDays();
+            syncExerciseTicks();
         }
 
         // ---------- Check-in stats (Progress tab) ----------
@@ -1220,13 +1259,30 @@
                 weeks.forEach(dates => {
                     const d = dates[row];
                     const done = checkinDates.has(d), future = d > today;
+                    const exCount = (exerciseLog[d] || []).length;
+                    // Checked in = full colour; exercises ticked but no check-in = light; nothing = gray.
                     const cls = future ? 'bg-transparent border border-dashed border-gray-200'
-                        : done ? 'bg-rose-500' : 'bg-gray-100';
-                    grid += `<span data-day="${d}" class="h-4 rounded-sm ${cls} ${d === today ? 'ring-2 ring-offset-1 ring-gray-400' : ''}"
-                        title="${d}${done ? ' · เช็กชื่อแล้ว' : ''}" aria-label="${d}${done ? ' เช็กชื่อแล้ว' : (future ? ' ยังไม่ถึง' : ' ไม่ได้เช็กชื่อ')}"></span>`;
+                        : done ? 'bg-rose-500' : exCount ? 'bg-rose-200' : 'bg-gray-100';
+                    const state = done ? 'เช็กชื่อแล้ว' : future ? 'ยังไม่ถึง' : exCount ? 'ทำท่าฝึก (ไม่ได้เช็กชื่อ)' : 'ไม่ได้เช็กชื่อ';
+                    const detail = `${d} · ${state}${exCount ? ` · ${exCount} ท่า` : ''}`;
+                    grid += `<span data-day="${d}" class="h-4 rounded-sm ${cls} ${d === today ? 'ring-2 ring-offset-1 ring-offset-surface ring-gray-400' : ''}"
+                        title="${detail}" aria-label="${detail}"></span>`;
                 });
             });
             grid += '</div>';
+
+            // The last 7 days that have ticked exercises, newest first.
+            const recent = [];
+            for (let i = 0; i < 7; i++) {
+                const d = localDateStr(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+                if (exerciseLog[d]) recent.push([d, exerciseLog[d]]);
+            }
+            const exTotal = Object.values(exerciseLog).reduce((n, ids) => n + ids.length, 0);
+            const recentHtml = recent.length
+                ? `<ul class="space-y-1.5 text-xs" id="exerciseHistory">${recent.map(([d, ids]) => `
+                    <li class="flex gap-3"><span class="text-gray-500 w-12 shrink-0">${shortDate(d)}</span>
+                        <span class="text-gray-700">${ids.map(id => escapeHtml(EXERCISES_BY_ID[id].name)).join(' · ')}</span></li>`).join('')}</ul>`
+                : '<p class="text-xs text-gray-500" id="exerciseHistory">ยังไม่มีท่าที่ทำใน 7 วันล่าสุด กด "ทำเสร็จแล้ว" ที่การ์ดท่าฝึกเพื่อบันทึก</p>';
 
             el.innerHTML = `
                 <div class="grid grid-cols-3 gap-x-4 mb-4 py-3 border-y border-rose-100">
@@ -1239,9 +1295,17 @@
                 </div>
                 <div class="text-[11px] text-gray-500 mb-1.5">${HISTORY_WEEKS} สัปดาห์ล่าสุด (ซ้าย → ขวา = เก่า → ใหม่)</div>
                 <div class="max-w-md">${grid}</div>
-                <div class="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-gray-500">
                     <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-rose-500"></span>เช็กชื่อแล้ว</span>
-                    <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-gray-100"></span>ไม่ได้เช็กชื่อ</span>
+                    <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-rose-200"></span>ทำท่าฝึก (ไม่ได้เช็กชื่อ)</span>
+                    <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-gray-100"></span>ไม่ได้ทำ</span>
+                </div>
+                <div class="mt-5 pt-4 border-t border-rose-100">
+                    <div class="flex items-baseline justify-between mb-2">
+                        <h4 class="text-xs font-semibold text-gray-700">ท่าที่ทำใน 7 วันล่าสุด</h4>
+                        <span class="text-[11px] text-gray-500">รวมทั้งหมด <strong class="text-gray-700" id="statExTotal">${exTotal}</strong> ครั้ง</span>
+                    </div>
+                    ${recentHtml}
                 </div>`;
         }
 
@@ -1339,6 +1403,7 @@
                 tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">ยังไม่มีข้อมูล — กรอกค่าครั้งแรกด้านบนเพื่อเริ่มติดตาม</td></tr>`;
                 summary.innerHTML = '';
                 document.getElementById('measureCharts').innerHTML = '';
+                renderReminderBanner();
                 return;
             }
 
@@ -1375,6 +1440,7 @@
                 </div>`;
 
             renderCharts(sorted);
+            renderReminderBanner();
 
             // Keep the protein calculator in step with the latest recorded weight, but only when that
             // weight changes, so a value the user typed in isn't overwritten by a delete or import.
@@ -1403,11 +1469,11 @@
         }
 
         // ---------- Trend charts (inline SVG, one small chart per measure, each on its own scale) ----------
-        // Series colours are fixed per measure (categorical slots 1-3), so a measure keeps its colour.
+        // Series colours are fixed per measure (categorical slots 1-3, defined per theme in src/tailwind.css).
         const CHART_METRICS = [
-            { key: 'weight', label: 'น้ำหนัก', unit: 'กก.', color: '#2a78d6' },
-            { key: 'waist', label: 'รอบเอว', unit: 'ซม.', color: '#eb6834' },
-            { key: 'hip', label: 'รอบสะโพก', unit: 'ซม.', color: '#1baf7a' }
+            { key: 'weight', label: 'น้ำหนัก', unit: 'กก.', color: 'var(--series-weight)' },
+            { key: 'waist', label: 'รอบเอว', unit: 'ซม.', color: 'var(--series-waist)' },
+            { key: 'hip', label: 'รอบสะโพก', unit: 'ซม.', color: 'var(--series-hip)' }
         ];
         const CHART_W = 300, CHART_H = 150;
         const CHART_M = { l: 34, r: 40, t: 12, b: 24 };
@@ -1441,20 +1507,20 @@
             for (let tick = t0; tick <= t1 + 1e-9; tick += step) {
                 const y = py(tick).toFixed(1);
                 const isBase = Math.abs(tick - t0) < 1e-9;
-                grid += `<line x1="${CHART_M.l}" x2="${CHART_W - CHART_M.r}" y1="${y}" y2="${y}" stroke="${isBase ? '#c3c2b7' : '#e1e0d9'}" stroke-width="1"/>`
-                     + `<text x="${CHART_M.l - 6}" y="${(+y + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="#898781">${fmt(tick)}</text>`;
+                grid += `<line x1="${CHART_M.l}" x2="${CHART_W - CHART_M.r}" y1="${y}" y2="${y}" class="${isBase ? 'c-axis' : 'c-grid'}" stroke-width="1"/>`
+                     + `<text x="${CHART_M.l - 6}" y="${(+y + 3).toFixed(1)}" text-anchor="end" font-size="9" class="c-muted">${fmt(tick)}</text>`;
             }
 
             const path = pts.map(p => `${px(p).toFixed(1)},${py(p.v).toFixed(1)}`).join(' ');
             const last = pts[pts.length - 1];
             const dots = pts.map((p, i) =>
-                `<circle cx="${px(p).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="4" fill="${metric.color}" stroke="#fff" stroke-width="2"/>`
+                `<circle cx="${px(p).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="4" style="fill:${metric.color}" class="c-ring" stroke-width="2"/>`
               + `<circle class="chart-hit" tabindex="0" cx="${px(p).toFixed(1)}" cy="${py(p.v).toFixed(1)}" r="14" fill="transparent"`
               + ` data-tip="${escapeHtml(p.date)} · ${fmt(p.v)} ${metric.unit}" data-x="${(px(p) / CHART_W * 100).toFixed(1)}" data-y="${(py(p.v) / CHART_H * 100).toFixed(1)}"`
               + ` aria-label="${metric.label} ${fmt(p.v)} ${metric.unit} วันที่ ${escapeHtml(p.date)}"/>`).join('');
 
-            const xLabels = `<text x="${CHART_M.l}" y="${CHART_H - 6}" font-size="9" fill="#898781">${shortDate(pts[0].date)}</text>`
-                + (span > 0 ? `<text x="${CHART_W - CHART_M.r}" y="${CHART_H - 6}" text-anchor="end" font-size="9" fill="#898781">${shortDate(last.date)}</text>` : '');
+            const xLabels = `<text x="${CHART_M.l}" y="${CHART_H - 6}" font-size="9" class="c-muted">${shortDate(pts[0].date)}</text>`
+                + (span > 0 ? `<text x="${CHART_W - CHART_M.r}" y="${CHART_H - 6}" text-anchor="end" font-size="9" class="c-muted">${shortDate(last.date)}</text>` : '');
 
             return `<figure class="relative m-0" data-chart="${metric.key}">
                 <figcaption class="text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5">
@@ -1463,9 +1529,9 @@
                 <div class="relative">
                 <svg viewBox="0 0 ${CHART_W} ${CHART_H}" class="w-full h-auto block" role="img" aria-label="${metric.label}: ${fmt(pts[0].v)} ถึง ${fmt(last.v)} ${metric.unit} จาก ${pts.length} ครั้ง">
                     ${grid}${xLabels}
-                    <polyline points="${path}" fill="none" stroke="${metric.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                    <polyline points="${path}" fill="none" style="stroke:${metric.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
                     ${dots}
-                    <text x="${(px(last) + 9).toFixed(1)}" y="${(py(last.v) + 4).toFixed(1)}" font-size="11" font-weight="600" fill="#0b0b0b">${fmt(last.v)}</text>
+                    <text x="${(px(last) + 9).toFixed(1)}" y="${(py(last.v) + 4).toFixed(1)}" font-size="11" font-weight="600" class="c-ink">${fmt(last.v)}</text>
                 </svg>
                 <div class="chart-tip absolute pointer-events-none bg-gray-900 text-white text-[11px] rounded-md px-2 py-1 whitespace-nowrap" hidden></div>
                 </div>
@@ -1511,11 +1577,11 @@
             URL.revokeObjectURL(a.href);
         }
 
-        // version 2 adds check-in history and plan length; version 1 files (measurements only) still import.
+        // v2 added check-ins and plan length, v3 the exercise log. Older files still import.
         function exportMeasurementsJson() {
             const payload = {
-                app: 'hourglass-balance', version: 2, exportedAt: new Date().toISOString(),
-                measurements, checkins: [...checkinDates].sort(), planFreq: currentPlanFreq
+                app: 'hourglass-balance', version: 3, exportedAt: new Date().toISOString(),
+                measurements, checkins: [...checkinDates].sort(), planFreq: currentPlanFreq, exerciseLog
             };
             downloadText(`hourglass-backup-${localDateStr()}.json`, 'application/json', JSON.stringify(payload, null, 2));
             setBackupMsg(`สำรองข้อมูล ${measurements.length} รายการ · เช็กชื่อ ${checkinDates.size} วัน แล้ว`, false);
@@ -1579,7 +1645,7 @@
                 const get = (r, i) => (i >= 0 && i < r.length ? r[i] : '');
                 return { records: rows.map(r => ({
                     date: get(r, idx.date), weight: get(r, idx.weight), waist: get(r, idx.waist), hip: get(r, idx.hip), note: get(r, idx.note)
-                })), checkins: [], planFreq: null };
+                })), checkins: [], planFreq: null, exerciseLog: {} };
             }
             const data = JSON.parse(text);
             const list = Array.isArray(data) ? data : data && data.measurements;
@@ -1587,7 +1653,8 @@
             return {
                 records: list,
                 checkins: data && Array.isArray(data.checkins) ? data.checkins : [],
-                planFreq: data && schedulePlans[data.planFreq] ? data.planFreq : null
+                planFreq: data && schedulePlans[data.planFreq] ? data.planFreq : null,
+                exerciseLog: data && data.exerciseLog ? data.exerciseLog : {}
             };
         }
 
@@ -1597,7 +1664,7 @@
             if (!file) return;
             if (file.size > 1024 * 1024) { setBackupMsg('ไฟล์ใหญ่เกินไป (สูงสุด 1 MB)', true); return; }
             try {
-                const { records, checkins, planFreq } = recordsFromImport(file.name, await file.text());
+                const { records, checkins, planFreq, exerciseLog: importedLog } = recordsFromImport(file.name, await file.text());
                 const today = localDateStr();
                 let checkinsAdded = 0;
                 checkins.forEach(d => {
@@ -1605,6 +1672,15 @@
                 });
                 if (checkinsAdded) { saveCheckins(); syncCheckedDays(); renderDayTracker(); }
                 if (planFreq) setWeeklyPlan(planFreq);
+
+                // Exercise log: add any exercise/date pairs we don't already have.
+                let exAdded = 0;
+                for (const [date, exIds] of Object.entries(cleanExerciseLog(importedLog))) {
+                    const have = new Set(exerciseLog[date] || []);
+                    exIds.forEach(id => { if (!have.has(id)) { have.add(id); exAdded++; } });
+                    exerciseLog[date] = [...have];
+                }
+                if (exAdded) { saveExerciseLog(); syncExerciseTicks(); renderExercises(); }
                 renderCheckinStats();
 
                 const ids = new Set(measurements.map(m => m.id));
@@ -1624,8 +1700,9 @@
                     setBackupMsg('นำเข้าแล้ว แต่บันทึกลงเบราว์เซอร์ไม่ได้ ข้อมูลจะหายเมื่อรีเฟรช', true);
                 } else {
                     setBackupMsg(`นำเข้า ${added} รายการ` + (skipped ? ` (ข้าม ${skipped} รายการที่ซ้ำหรือไม่ถูกต้อง)` : '')
-                        + (checkinsAdded ? ` · เช็กชื่อ ${checkinsAdded} วัน` : ''),
-                        added === 0 && checkinsAdded === 0 && records.length > 0);
+                        + (checkinsAdded ? ` · เช็กชื่อ ${checkinsAdded} วัน` : '')
+                        + (exAdded ? ` · ท่าฝึก ${exAdded} รายการ` : ''),
+                        added === 0 && checkinsAdded === 0 && exAdded === 0 && records.length > 0);
                 }
                 renderMeasurements();
             } catch (e) {
@@ -1692,10 +1769,154 @@
             renderExercises();
             renderMeasurements();
             renderCheckinStats();
+            renderReminderSettings();
         });
+
+        // ---------- Weekly measurement reminder ----------
+        // Web pages can't schedule notifications without a server, so: an in-app banner when the last
+        // measurement is 7+ days old, and a repeating calendar event (.ics) that the phone's calendar alerts on.
+        const REMINDER_DUE_DAYS = 7;
+        const SNOOZE_KEY = 'hg.reminderSnooze';
+        const ICS_DAYS = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+
+        function daysSinceLastMeasurement() {
+            if (!measurements.length) return null;
+            const last = measurements.reduce((a, m) => (m.date > a ? m.date : a), measurements[0].date);
+            const [y, mo, d] = last.split('-').map(Number), now = new Date();
+            return Math.round((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - new Date(y, mo - 1, d)) / 86400000);
+        }
+
+        function renderReminderBanner() {
+            const el = document.getElementById('reminderBanner');
+            const since = daysSinceLastMeasurement();
+            let snoozed = false;
+            try { snoozed = localStorage.getItem(SNOOZE_KEY) === localDateStr(); } catch (e) {}
+            if (since === null || since < REMINDER_DUE_DAYS || snoozed) { el.innerHTML = ''; return; }
+            el.innerHTML = `<div class="glass-card rounded-2xl px-4 py-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">`
+                + `<div class="flex items-center gap-2 text-gray-800"><i class="ph-fill ph-bell-ringing text-rose-500 text-lg"></i>`
+                + `<span><strong>ถึงเวลาวัดสัดส่วนประจำสัปดาห์</strong> · วัดครั้งล่าสุด ${since} วันก่อน</span></div>`
+                + `<div class="flex gap-2 shrink-0"><a href="#progress" class="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-semibold">ไปบันทึก</a>`
+                + `<button type="button" onclick="snoozeReminder()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium">ไว้พรุ่งนี้</button></div></div>`;
+        }
+
+        function snoozeReminder() {
+            try { localStorage.setItem(SNOOZE_KEY, localDateStr()); } catch (e) {}
+            renderReminderBanner();
+        }
+
+        function readReminderSettings() {
+            const saved = storageGet(STORAGE_KEYS.reminder, null);
+            const day = saved && Number.isInteger(saved.day) && saved.day >= 0 && saved.day <= 6 ? saved.day : 0;
+            const time = saved && /^([01]\d|2[0-3]):[0-5]\d$/.test(saved.time) ? saved.time : '07:00';
+            return { day, time };
+        }
+
+        function renderReminderSettings() {
+            const { day, time } = readReminderSettings();
+            document.getElementById('remDay').value = String(day);
+            document.getElementById('remTime').value = time;
+        }
+
+        function saveReminderSettings() {
+            const day = Number(document.getElementById('remDay').value);
+            const raw = document.getElementById('remTime').value;
+            storageSet(STORAGE_KEYS.reminder, { day, time: /^([01]\d|2[0-3]):[0-5]\d$/.test(raw) ? raw : '07:00' });
+        }
+
+        // iCalendar text: escape special characters, fold lines at 75 bytes without splitting a Thai character.
+        function icsText(s) {
+            return s.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+        }
+
+        function icsFold(line) {
+            const enc = new TextEncoder(), parts = [];
+            let cur = '', bytes = 0;
+            for (const ch of line) {
+                const b = enc.encode(ch).length;
+                if (bytes + b > 75) { parts.push(cur); cur = ' ' + ch; bytes = 1 + b; }
+                else { cur += ch; bytes += b; }
+            }
+            parts.push(cur);
+            return parts.join('\r\n');
+        }
+
+        // Next date (today or later) on the chosen weekday at the chosen time.
+        function nextReminderStart(dayIdx, time, now = new Date()) {
+            const [h, m] = time.split(':').map(Number);
+            const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+            let add = (dayIdx - (now.getDay() + 6) % 7 + 7) % 7;
+            if (add === 0 && start <= now) add = 7;
+            start.setDate(start.getDate() + add);
+            return start;
+        }
+
+        function buildReminderIcs({ day, time }, now = new Date()) {
+            const p = n => String(n).padStart(2, '0');
+            const start = nextReminderStart(day, time, now);
+            const local = `${start.getFullYear()}${p(start.getMonth() + 1)}${p(start.getDate())}T${p(start.getHours())}${p(start.getMinutes())}00`;
+            const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+            const appUrl = new URL('index.html#progress', location.href).href;
+            const lines = [
+                'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Hourglass Balance//Measurement reminder//TH', 'CALSCALE:GREGORIAN',
+                'BEGIN:VEVENT',
+                'UID:hourglass-measure-weekly@ninepth.github.io',
+                `DTSTAMP:${stamp}`,
+                `DTSTART:${local}`, // floating time: the phone's own time zone
+                'DURATION:PT10M',
+                `RRULE:FREQ=WEEKLY;BYDAY=${ICS_DAYS[day]}`,
+                `SUMMARY:${icsText('วัดสัดส่วน (เอว / สะโพก / น้ำหนัก)')}`,
+                `DESCRIPTION:${icsText('เปิด Hourglass Balance แล้วบันทึกที่แท็บความคืบหน้า\n' + appUrl)}`,
+                `URL:${appUrl}`,
+                'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${icsText('ถึงเวลาวัดสัดส่วนแล้ว')}`, 'TRIGGER:PT0M', 'END:VALARM',
+                'END:VEVENT', 'END:VCALENDAR'
+            ];
+            return lines.map(icsFold).join('\r\n') + '\r\n';
+        }
+
+        function downloadReminderIcs() {
+            saveReminderSettings();
+            const settings = readReminderSettings();
+            downloadText('hourglass-measure-reminder.ics', 'text/calendar;charset=utf-8', buildReminderIcs(settings));
+            const dayName = document.getElementById('remDay').selectedOptions[0].textContent;
+            document.getElementById('reminderMsg').textContent = `ดาวน์โหลดแล้ว: เตือนทุกวัน${dayName} เวลา ${settings.time} น. เปิดไฟล์เพื่อเพิ่มลงปฏิทิน`;
+        }
+
+        // ---------- Theme (auto follows the device; the head script applies a saved choice before paint) ----------
+        const THEME_KEY = 'hg.theme';
+        const THEMES = {
+            auto: { icon: 'ph-circle-half', label: 'อัตโนมัติ', next: 'light' },
+            light: { icon: 'ph-sun', label: 'สว่าง', next: 'dark' },
+            dark: { icon: 'ph-moon', label: 'มืด', next: 'auto' }
+        };
+
+        function currentTheme() {
+            return THEMES[document.documentElement.dataset.theme] ? document.documentElement.dataset.theme : 'auto';
+        }
+
+        function renderThemeButton() {
+            const t = THEMES[currentTheme()];
+            document.getElementById('themeIcon').className = `ph-fill ${t.icon}`;
+            document.getElementById('themeLabel').textContent = t.label;
+            document.getElementById('themeBtn').setAttribute('aria-label', `ธีม: ${t.label} (กดเพื่อเปลี่ยน)`);
+        }
+
+        function applyTheme(name) {
+            if (name === 'auto') delete document.documentElement.dataset.theme;
+            else document.documentElement.dataset.theme = name;
+            try {
+                if (name === 'auto') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, name);
+            } catch (e) {}
+            renderThemeButton();
+        }
+
+        function cycleTheme() {
+            applyTheme(THEMES[currentTheme()].next);
+        }
 
         // Initialize as soon as the DOM is ready; don't wait for fonts and icons to finish loading.
         function init() {
+            renderThemeButton();
+            renderReminderSettings();
             showSectionFromHash(false);
             loadProgress();
             loadMeasurements();

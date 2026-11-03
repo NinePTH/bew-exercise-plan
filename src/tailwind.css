@@ -1,0 +1,107 @@
+/* Source for styles.css. Rebuild with `npm run build:css` after changing classes in index.html. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Page-level colours that are not Tailwind classes. Chart values follow the dataviz reference palette. */
+:root {
+    color-scheme: light;
+    --page: #fdf8f6;
+    --ink: #1f2937;
+    --card: rgba(255, 255, 255, 0.9);
+    --card-border: rgba(244, 63, 94, 0.12);
+    --scroll-thumb: #fda4af;
+    --chart-grid: #e1e0d9;
+    --chart-axis: #c3c2b7;
+    --chart-muted: #6f6e69;
+    --chart-ink: #0b0b0b;
+    --chart-ring: #ffffff;
+    --series-weight: #2a78d6;
+    --series-waist: #eb6834;
+    --series-hip: #1baf7a;
+    --active-shadow: 0 4px 15px rgba(244, 63, 94, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --page: #0e0e12;
+        --ink: #e7e7ec;
+        --card: rgba(27, 27, 33, 0.92);
+        --card-border: rgba(244, 63, 94, 0.2);
+        --scroll-thumb: #9f1239;
+        --chart-grid: #2c2c2a;
+        --chart-axis: #4a4a46;
+        --chart-muted: #9a9890;
+        --chart-ink: #f0efec;
+        --chart-ring: #1b1b21;
+        --series-weight: #3987e5;
+        --series-waist: #d95926;
+        --series-hip: #199e70;
+        --active-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    }
+}
+
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0e0e12;
+    --ink: #e7e7ec;
+    --card: rgba(27, 27, 33, 0.92);
+    --card-border: rgba(244, 63, 94, 0.2);
+    --scroll-thumb: #9f1239;
+    --chart-grid: #2c2c2a;
+    --chart-axis: #4a4a46;
+    --chart-muted: #9a9890;
+    --chart-ink: #f0efec;
+    --chart-ring: #1b1b21;
+    --series-weight: #3987e5;
+    --series-waist: #d95926;
+    --series-hip: #199e70;
+    --active-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+body {
+    font-family: 'Prompt', sans-serif;
+    background-color: var(--page);
+    color: var(--ink);
+}
+
+.glass-card {
+    background: var(--card);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border);
+}
+
+/* Tailwind's display utilities (grid, flex) beat the [hidden] attribute, so enforce it for panels. */
+[data-panel][hidden] {
+    display: none !important;
+}
+
+.active-tab {
+    background: linear-gradient(135deg, #be123c 0%, #e11d48 100%);
+    color: white;
+    box-shadow: var(--active-shadow);
+}
+
+.breathing-circle {
+    transition: all 1s ease-in-out;
+}
+
+/* Trend chart parts (inline SVG uses these instead of fixed colours so it follows the theme). */
+.c-grid { stroke: var(--chart-grid); }
+.c-axis { stroke: var(--chart-axis); }
+.c-muted { fill: var(--chart-muted); }
+.c-ink { fill: var(--chart-ink); }
+.c-ring { stroke: var(--chart-ring); }
+
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--page);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scroll-thumb);
+    border-radius: 9999px;
+}
