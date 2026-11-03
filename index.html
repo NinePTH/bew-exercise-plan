@@ -513,8 +513,8 @@
     <!-- First-run tour: dims the page and spotlights the real control; never blocks the page underneath -->
     <div id="tour" class="fixed inset-0 z-50 pointer-events-none" hidden>
         <div id="tourSpot" class="tour-spot" aria-hidden="true"></div>
-        <div id="tourCard" role="dialog" aria-modal="false" aria-labelledby="tourTitle" aria-describedby="tourBody" onkeydown="tourKey(event)"
-            class="tour-card fixed pointer-events-auto bg-surface text-gray-800 rounded-2xl border border-rose-100 shadow-xl p-5">
+        <div id="tourCard" role="dialog" aria-modal="false" aria-labelledby="tourTitle" aria-describedby="tourBody" inert
+            class="tour-card tour-card-hidden fixed pointer-events-auto bg-surface text-gray-800 rounded-2xl border border-rose-100 shadow-xl p-5">
             <h2 id="tourTitle" class="text-base font-bold text-gray-900 leading-snug"></h2>
             <p id="tourBody" class="text-sm text-gray-600 mt-1.5 leading-relaxed"></p>
             <div class="flex items-center gap-1.5 mt-4">
@@ -1744,32 +1744,85 @@
         }
 
         // ---------- First-run tour ----------
-        // Four steps that spotlight the real controls. Shown once to brand-new users (no saved data),
-        // replayable from the header's "วิธีใช้" button. The page underneath stays usable.
+        // Spotlights the real controls, one tab at a time. Shown once to brand-new users (no saved data),
+        // replayable from the header's "วิธีใช้" button, which starts at the tab you're on.
+        // The page underneath stays usable. Motion: the page scrolls smoothly while the spotlight eases
+        // toward the target's live position each frame; the card hides while anything moves, then fades in.
         const TOUR_KEY = 'hg.tourSeen';
+        const isWide = () => window.matchMedia('(min-width: 768px)').matches;
+        const byId = id => document.getElementById(id);
         const TOUR_STEPS = [
             {
-                tab: 'workout', target: () => document.getElementById('planBtn-3').parentElement,
+                tab: 'workout', scroll: false, target: () => byId('sectionNav'),
+                title: 'ทุกอย่างอยู่ใน 3 แท็บ',
+                body: 'ออกกำลังกาย: ตารางและท่าฝึก · ความคืบหน้า: สถิติและสัดส่วน · โภชนาการ: โปรตีนและเมนู ทัวร์นี้จะพาไปทีละแท็บ ใช้เวลาราว 1 นาที'
+            },
+            {
+                tab: 'workout', target: () => byId('planBtn-3').parentElement,
                 title: 'เลือกแพลนที่ทำไหว',
                 body: 'เพิ่งเริ่มหรือห่างหายไปนาน เลือก 3 วันก่อน แล้วค่อยขยับเป็น 4–5 วันเมื่อร่างกายคุ้นเคย เปลี่ยนได้ตลอด'
             },
             {
-                tab: 'workout', target: () => document.querySelector('#exerciseList > div button[onclick^="toggleExerciseDone"]'),
-                title: 'ทำท่าไหนเสร็จ กดเช็กไว้',
-                body: 'แตะวันในตาราง แอปจะเปิดท่าฝึกของวันนั้นให้ ทำแต่ละท่าเสร็จก็กดปุ่มนี้ ระบบจะจำไว้เป็นประวัติ'
-            },
-            {
                 tab: 'workout', target: () => document.querySelectorAll('#dayTrackerContainer > div')[(new Date().getDay() + 6) % 7],
                 title: 'ซ้อมเสร็จ เช็กชื่อวันนี้',
-                body: 'กดวงกลมมุมขวาบนของวันนี้ทุกครั้งที่ซ้อมเสร็จ สัปดาห์ไหนเช็กชื่อครบ 3 วัน จะนับเป็นสัปดาห์ติดต่อกันในแท็บความคืบหน้า'
+                body: 'แตะการ์ดวันเพื่อเปิดท่าฝึกของวันนั้น ซ้อมเสร็จแล้วกดวงกลมมุมขวาบน สัปดาห์ไหนเช็กชื่อครบ 3 วัน จะนับเป็นสัปดาห์ติดต่อกัน'
             },
             {
-                tab: 'progress', target: () => document.getElementById('exportJsonBtn'),
+                tab: 'workout', target: () => byId('programTabs'),
+                title: 'เวลาน้อยก็ยังซ้อมได้',
+                body: 'เลือกโปรแกรมตามเวลาที่มีวันนี้ (เวลาอยู่มุมขวาของแต่ละปุ่ม) วันยุ่งใช้โหมด Quick 15–20 นาที หรือยืดเหยียด 5–10 นาทีก็ยังดี'
+            },
+            {
+                tab: 'workout', target: () => document.querySelector('#exerciseList > div button[onclick^="toggleExerciseDone"]'),
+                title: 'ทำท่าไหนเสร็จ กดเช็กไว้',
+                body: 'แต่ละท่ามีวิธีทำและจำนวนเซตบอกไว้ ทำเสร็จก็กดปุ่มนี้ ระบบจะนับให้และเก็บเป็นประวัติ 7 วันในแท็บความคืบหน้า'
+            },
+            {
+                tab: 'workout',
+                target: () => {
+                    const timer = byId('startPauseBtn').closest('.glass-card');
+                    return isWide() ? [timer, byId('vacuumBtn').closest('.glass-card')] : timer;
+                },
+                compact: () => { const controls = byId('startPauseBtn').parentElement; return [controls.previousElementSibling, controls]; },
+                title: 'ตัวช่วยระหว่างซ้อม',
+                body: () => 'นาฬิกาพักเซต / แพลงก์: แตะเวลาแล้วเริ่มนับทันที '
+                    + (isWide() ? 'ข้างกันคือ' : 'ถัดลงไปมี')
+                    + 'โค้ช Stomach Vacuum นับจังหวะหายใจให้ ทำทุกเช้าช่วยให้เอวดูคอด'
+            },
+            {
+                tab: 'progress', target: () => [...byId('checkinStats').children].slice(0, 4),
+                compact: () => byId('checkinStats').firstElementChild,
+                title: 'ดูความสม่ำเสมอของตัวเอง',
+                body: 'วันที่เช็กชื่อจะขึ้นเป็นช่องสีในตาราง 8 สัปดาห์ พร้อมนับสัปดาห์ติดต่อกันให้ ไม่ต้องกรอกอะไรเพิ่ม'
+            },
+            {
+                tab: 'progress', target: () => [byId('remDay').closest('.mb-5'), byId('measureForm')],
+                compact: () => byId('measureForm'),
+                title: 'วัดสัดส่วนสัปดาห์ละครั้ง',
+                body: 'กรอกน้ำหนัก รอบเอว และรอบสะโพก แอปจะวาดกราฟแนวโน้มให้ ตั้งวันเตือนแล้วกด "เพิ่มลงปฏิทิน" มือถือจะเตือนทุกสัปดาห์แม้ไม่ได้เปิดแอปนี้'
+            },
+            {
+                tab: 'progress', target: () => byId('exportJsonBtn').parentElement,
                 title: 'ข้อมูลอยู่ในเครื่องนี้เท่านั้น',
-                body: 'ไม่มีบัญชีและไม่ส่งข้อมูลไปไหน ถ้าเปลี่ยนมือถือหรือล้างข้อมูลเบราว์เซอร์ ข้อมูลจะหาย กดสำรองข้อมูลเก็บไฟล์ไว้เป็นระยะ ดูวิธีใช้ซ้ำได้จากปุ่ม "วิธีใช้" ด้านบน'
+                body: 'ไม่มีบัญชีและไม่ส่งข้อมูลไปไหน ถ้าเปลี่ยนมือถือหรือล้างข้อมูลเบราว์เซอร์ ข้อมูลจะหาย กดสำรองข้อมูลเก็บไฟล์ไว้เป็นระยะ แล้วใช้ "นำเข้าข้อมูล" บนเครื่องใหม่'
+            },
+            {
+                tab: 'nutrition', target: () => [byId('proteinWeight').closest('label'), byId('proteinResult').parentElement],
+                title: 'โปรตีนต่อวันของคุณ',
+                body: 'ใส่น้ำหนักตัว แอปจะคำนวณเป้าโปรตีนต่อวันให้ ถัดลงไปมีเมนูตัวอย่าง 1 วันที่ทำกินเองได้ในห้องพัก'
+            },
+            {
+                tab: 'nutrition', target: () => [byId('themeBtn'), byId('helpBtn')],
+                title: 'ปรับให้เข้ากับคุณ',
+                body: 'สลับโหมดสว่าง / มืดได้ที่ปุ่มนี้ และเปิดทัวร์นี้ซ้ำได้จาก "วิธีใช้" เคล็ดลับ: เพิ่มหน้านี้ลงหน้าจอหลักของมือถือ จะเปิดได้เหมือนแอป แม้ไม่มีเน็ต'
             }
         ];
-        let tourIndex = -1, tourReturnTab = 'workout', tourReturnFocus = null, tourFrame = 0, tourScrollTimer = 0;
+        const TOUR_PAD = 8, TOUR_GAP = 14, TOUR_MARGIN = 16, TOUR_GLIDE_MS = 520, TOUR_FADE_MS = 220;
+        let tourIndex = -1, tourGen = 0, tourFrame = 0, tourMoving = false, tourDrawn = null, tourResizeObserver = null;
+        let tourReturnTab = 'workout', tourReturnFocus = null, tourReturnScroll = 0;
+
+        const tourReduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const easeOutExpo = t => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
 
         // Switch tab without the hashchange handler's scroll-to-top.
         function setSection(tab) {
@@ -1777,27 +1830,132 @@
             showSection(tab);
         }
 
-        function startTour() {
+        // One box around everything a step points at (a step may name several elements). On a short
+        // screen where that box and the card can't both fit, a step's smaller `compact` target is used.
+        function tourTargetRect(step) {
+            const r = tourUnionRect(step.target());
+            if (!r || !step.compact) return r;
+            const fits = r.height + TOUR_PAD * 2 + TOUR_GAP + tourCardHeight() + TOUR_MARGIN * 2 <= tourViewportBottom();
+            return fits ? r : (tourUnionRect(step.compact()) || r);
+        }
+
+        function tourUnionRect(t) {
+            let r = null;
+            for (const el of (Array.isArray(t) ? t : [t])) {
+                if (!el) continue;
+                const b = el.getBoundingClientRect();
+                if (!b.width && !b.height) continue;
+                r = r ? { top: Math.min(r.top, b.top), left: Math.min(r.left, b.left), right: Math.max(r.right, b.right), bottom: Math.max(r.bottom, b.bottom) }
+                      : { top: b.top, left: b.left, right: b.right, bottom: b.bottom };
+            }
+            return r && { ...r, width: r.right - r.left, height: r.bottom - r.top };
+        }
+
+        // Visible area: on phones the tab bar is fixed at the bottom, so the card stays above it.
+        function tourViewportBottom() {
+            const nav = byId('sectionNav');
+            return getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().top : window.innerHeight;
+        }
+
+        function tourCardHeight() {
+            const card = byId('tourCard');
+            card.style.width = Math.min(360, window.innerWidth - TOUR_MARGIN * 2) + 'px';
+            return card.offsetHeight;
+        }
+
+        // Where to scroll so the target and the card below it sit together in the middle of the screen.
+        function tourScrollDestination(r) {
+            const bottom = tourViewportBottom(), room = bottom - TOUR_MARGIN * 2;
+            const stack = r.height + TOUR_PAD * 2 + TOUR_GAP + tourCardHeight();
+            const want = stack <= room ? TOUR_MARGIN + (room - stack) / 2 + TOUR_PAD : TOUR_MARGIN + TOUR_PAD;
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            return Math.max(0, Math.min(window.scrollY + r.top - want, max));
+        }
+
+        function drawTourSpot(r) {
+            const spot = byId('tourSpot');
+            if (!r) { spot.style.opacity = '0'; return; }
+            spot.style.opacity = '1';
+            spot.style.transform = `translate(${r.left - TOUR_PAD}px, ${r.top - TOUR_PAD}px)`;
+            spot.style.width = (r.width + TOUR_PAD * 2) + 'px';
+            spot.style.height = (r.height + TOUR_PAD * 2) + 'px';
+            tourDrawn = r;
+        }
+
+        // Below the target if it fits, otherwise above, always inside the visible area.
+        function placeTourCard(r) {
+            const card = byId('tourCard'), vw = window.innerWidth, bottom = tourViewportBottom();
+            const h = tourCardHeight(), w = card.offsetWidth;
+            if (!r) {
+                card.style.top = Math.max(TOUR_MARGIN, (bottom - h) / 2) + 'px';
+                card.style.left = (vw - w) / 2 + 'px';
+                return;
+            }
+            let top = r.bottom + TOUR_PAD + TOUR_GAP;
+            if (top + h > bottom - TOUR_MARGIN) top = r.top - TOUR_PAD - TOUR_GAP - h;
+            top = Math.max(TOUR_MARGIN, Math.min(top, bottom - TOUR_MARGIN - h));
+            card.style.top = top + 'px';
+            card.style.left = Math.min(Math.max(r.left + r.width / 2 - w / 2, TOUR_MARGIN), vw - w - TOUR_MARGIN) + 'px';
+        }
+
+        // Settled: snap both to the target (scrolling by hand, resizing, fonts arriving).
+        function placeTour() {
+            if (tourIndex < 0 || tourMoving) return;
+            const r = tourTargetRect(TOUR_STEPS[tourIndex]);
+            drawTourSpot(r);
+            placeTourCard(r);
+        }
+
+        function scheduleTourPlace() {
+            if (tourMoving) return;
+            cancelAnimationFrame(tourFrame);
+            tourFrame = requestAnimationFrame(placeTour);
+        }
+
+        function startTour(at) {
+            if (typeof at !== 'number') {
+                // From "วิธีใช้": begin with the tab you're looking at; Back still reaches the earlier steps.
+                const current = location.hash.slice(1);
+                at = Math.max(0, TOUR_STEPS.findIndex(s => s.tab === current));
+            }
+            if (tourIndex >= 0) { showTourStep(at); return; } // already open: just jump
             const current = location.hash.slice(1);
             tourReturnTab = SECTIONS.includes(current) ? current : 'workout';
             tourReturnFocus = document.activeElement;
+            tourReturnScroll = window.scrollY;
             try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
-            document.getElementById('tour').hidden = false;
-            window.addEventListener('scroll', onTourScroll, { passive: true });
+            byId('tourSpot').style.opacity = '0';
+            byId('tour').hidden = false;
+            window.addEventListener('scroll', scheduleTourPlace, { passive: true });
             window.addEventListener('resize', scheduleTourPlace);
-            showTourStep(0);
+            document.addEventListener('keydown', tourKeys);
+            // Content growing while you try things (a saved measurement draws charts) moves targets too.
+            if ('ResizeObserver' in window) (tourResizeObserver ||= new ResizeObserver(scheduleTourPlace)).observe(document.body);
+            showTourStep(at);
         }
 
         function endTour() {
             if (tourIndex < 0) return;
+            const gen = ++tourGen;
             tourIndex = -1;
-            document.getElementById('tour').hidden = true;
-            window.removeEventListener('scroll', onTourScroll);
+            tourMoving = false;
+            cancelAnimationFrame(tourFrame);
+            window.removeEventListener('scroll', scheduleTourPlace);
             window.removeEventListener('resize', scheduleTourPlace);
+            document.removeEventListener('keydown', tourKeys);
+            if (tourResizeObserver) tourResizeObserver.disconnect();
+            byId('tourCard').classList.add('tour-card-hidden');
+            byId('tourCard').inert = true;
+            byId('tourSpot').style.opacity = '0';
+            tourDrawn = null;
+            // Put the page back exactly as it was right away (a tab tapped during the fade must win),
+            // and let the dim fade out on top of it.
             setSection(tourReturnTab);
+            window.scrollTo({ top: tourReturnScroll, behavior: 'auto' });
             const back = tourReturnFocus && document.contains(tourReturnFocus) && tourReturnFocus !== document.body
-                ? tourReturnFocus : document.getElementById('helpBtn');
+                ? tourReturnFocus : byId('helpBtn');
             back.focus({ preventScroll: true });
+            setTimeout(() => { if (gen === tourGen) byId('tour').hidden = true; }, tourReduced() ? 0 : TOUR_FADE_MS);
         }
 
         function tourGo(delta) {
@@ -1806,76 +1964,84 @@
             else if (next >= 0) showTourStep(next);
         }
 
-        function tourKey(e) {
-            if (e.key === 'Escape') { e.preventDefault(); endTour(); }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); tourGo(1); }
-            else if (e.key === 'ArrowLeft') { e.preventDefault(); tourGo(-1); }
+        // Keys work wherever focus is (the page stays usable during the tour, and the card is inert
+        // while it moves): Escape closes; arrows step, except while typing or choosing in a field.
+        function tourKeys(e) {
+            if (e.key === 'Escape') { e.preventDefault(); endTour(); return; }
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const el = e.target;
+            if (el && (el.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(el.tagName))) return;
+            e.preventDefault();
+            tourGo(e.key === 'ArrowRight' ? 1 : -1);
         }
 
         function showTourStep(i) {
+            const gen = ++tourGen;
             tourIndex = i;
             const step = TOUR_STEPS[i], last = i === TOUR_STEPS.length - 1;
+            const card = byId('tourCard');
+            // Hide instantly (the text never changes in view) and take it out of the tab order and
+            // the accessibility tree until it reappears.
+            card.classList.add('tour-card-hidden');
+            card.inert = true; // (focus inside the card falls back to the page here)
+            const focusAtStart = document.activeElement;
+            const tabChanged = location.hash.slice(1) !== step.tab;
             setSection(step.tab);
-            document.getElementById('tourTitle').textContent = step.title;
-            document.getElementById('tourBody').textContent = step.body;
-            document.getElementById('tourCount').textContent = `${i + 1} / ${TOUR_STEPS.length}`;
-            document.getElementById('tourBack').hidden = i === 0;
-            document.getElementById('tourSkip').hidden = last;
-            document.getElementById('tourNext').textContent = last ? 'เริ่มใช้งาน' : 'ถัดไป';
-            const target = step.target();
-            // Jump the page, then let the spotlight glide to the target (the one animated moment).
-            if (target) target.scrollIntoView({ block: 'center', behavior: 'auto' });
-            document.getElementById('tour').classList.remove('tour-still');
-            placeTour();
-            document.getElementById('tourNext').focus({ preventScroll: true });
-        }
+            byId('tourTitle').textContent = step.title;
+            byId('tourBody').textContent = typeof step.body === 'function' ? step.body() : step.body;
+            byId('tourCount').textContent = `${i + 1} / ${TOUR_STEPS.length}`;
+            byId('tourBack').hidden = i === 0;
+            byId('tourSkip').hidden = last;
+            byId('tourNext').textContent = last ? 'เริ่มใช้งาน' : 'ถัดไป';
 
-        // While the user scrolls, follow the target instantly instead of gliding behind it.
-        function onTourScroll() {
-            const root = document.getElementById('tour');
-            root.classList.add('tour-still');
-            clearTimeout(tourScrollTimer);
-            tourScrollTimer = setTimeout(() => root.classList.remove('tour-still'), 150);
-            scheduleTourPlace();
-        }
-
-        function scheduleTourPlace() {
-            cancelAnimationFrame(tourFrame);
-            tourFrame = requestAnimationFrame(placeTour);
-        }
-
-        function placeTour() {
-            if (tourIndex < 0) return;
-            const spot = document.getElementById('tourSpot'), card = document.getElementById('tourCard');
-            const vw = window.innerWidth, vh = window.innerHeight, pad = 8, gap = 14, margin = 16;
-            // On phones the tab bar is fixed at the bottom; keep the card above it.
-            const nav = document.getElementById('sectionNav');
-            const bottom = getComputedStyle(nav).position === 'fixed' ? nav.getBoundingClientRect().top : vh;
-            const w = Math.min(360, vw - margin * 2);
-            card.style.width = w + 'px';
-            const h = card.offsetHeight;
-
-            const target = TOUR_STEPS[tourIndex].target();
-            const r = target ? target.getBoundingClientRect() : null;
-            if (!r || (r.width === 0 && r.height === 0)) {
-                spot.style.opacity = '0';
-                card.style.top = Math.max(margin, (bottom - h) / 2) + 'px';
-                card.style.left = (vw - w) / 2 + 'px';
-                return;
+            // Stop a smooth scroll still running from the previous step (fast Next, then Back).
+            window.scrollTo({ top: window.scrollY, behavior: 'auto' });
+            // Scroll the target into place: smoothly within a tab; straight there when the tab changed,
+            // because the whole page under the dim is new anyway and scrolling through it is noise.
+            const reduced = tourReduced();
+            const first = tourTargetRect(step);
+            let dest = null;
+            if (first && step.scroll !== false) {
+                dest = tourScrollDestination(first);
+                if (Math.abs(dest - window.scrollY) > 2) {
+                    window.scrollTo({ top: dest, behavior: reduced || tabChanged ? 'auto' : 'smooth' });
+                } else dest = null;
             }
-            spot.style.opacity = '1';
-            spot.style.top = (r.top - pad) + 'px';
-            spot.style.left = (r.left - pad) + 'px';
-            spot.style.width = (r.width + pad * 2) + 'px';
-            spot.style.height = (r.height + pad * 2) + 'px';
 
-            // Below the target if it fits, otherwise above, always inside the visible area.
-            let top = r.bottom + pad + gap;
-            if (top + h > bottom - margin) top = r.top - pad - gap - h;
-            top = Math.max(margin, Math.min(top, bottom - margin - h));
-            const left = Math.min(Math.max(r.left + r.width / 2 - w / 2, margin), vw - w - margin);
-            card.style.top = top + 'px';
-            card.style.left = left + 'px';
+            // The spotlight glides straight to where the target will be once the scroll lands (not
+            // after the moving content), from where it is now, or on the first step from a little wider.
+            const from = tourDrawn;
+            const start = performance.now(), glide = reduced ? 0 : TOUR_GLIDE_MS;
+            let lastY = NaN, still = 0;
+            tourMoving = true;
+            cancelAnimationFrame(tourFrame);
+            const frame = now => {
+                if (gen !== tourGen) return;
+                const live = tourTargetRect(step);
+                const aim = live && dest !== null ? { ...live, top: live.top + window.scrollY - dest } : live;
+                const t = glide ? Math.min(1, (now - start) / glide) : 1, e = easeOutExpo(t);
+                const a = from || (aim && { top: aim.top - 28, left: aim.left - 28, width: aim.width + 56, height: aim.height + 56 });
+                drawTourSpot(aim && a && {
+                    top: a.top + (aim.top - a.top) * e,
+                    left: a.left + (aim.left - a.left) * e,
+                    width: a.width + (aim.width - a.width) * e,
+                    height: a.height + (aim.height - a.height) * e
+                });
+                still = window.scrollY === lastY ? still + 1 : 0;
+                lastY = window.scrollY;
+                if (t >= 1 && (still >= 2 || now - start > 1600)) {
+                    tourMoving = false;
+                    placeTour();
+                    card.classList.remove('tour-card-hidden');
+                    card.inert = false;
+                    // Focus Next, unless they've moved focus to the page to try something meanwhile.
+                    const active = document.activeElement;
+                    if (!active || active === document.body || active === focusAtStart) byId('tourNext').focus({ preventScroll: true });
+                    return;
+                }
+                tourFrame = requestAnimationFrame(frame);
+            };
+            tourFrame = requestAnimationFrame(frame);
         }
 
         // Brand-new users only: anyone with saved data already knows their way around.
@@ -1885,7 +2051,7 @@
             if (seen) return;
             const hasData = measurements.length || checkinDates.size || Object.keys(exerciseLog).length;
             if (hasData) { try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {} return; }
-            startTour();
+            startTour(0);
             // Fonts and icons can shift the layout after first paint; re-aim once they're in.
             if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleTourPlace);
             window.addEventListener('load', scheduleTourPlace, { once: true });

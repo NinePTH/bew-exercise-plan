@@ -24,27 +24,76 @@ test('a friend opens the link for the first time and follows the tour, doing eac
     await page.clock.install({ time: WED_4_NOV });
     await page.goto('/');
 
-    // Step 1: pick the beginner plan right under the spotlight.
-    await expect(page.locator('#tourTitle')).toHaveText('เลือกแพลนที่ทำไหว');
-    await page.getByRole('button', { name: '3 วัน (เริ่มต้น)' }).tap();
-    await page.locator('#tourNext').tap();
+    const step = async (n, title) => {
+        await expect(page.locator('#tourCount')).toHaveText(`${n} / 11`);
+        await expect(page.locator('#tourTitle')).toHaveText(title);
+        await expect(page.locator('#tourCard')).not.toHaveClass(/tour-card-hidden/); // settled
+    };
+    const next = () => page.locator('#tourNext').tap();
 
-    // Step 2: finish an exercise.
+    // 1: the three tabs.
+    await step(1, 'ทุกอย่างอยู่ใน 3 แท็บ');
+    await next();
+
+    // 2: pick the beginner plan right under the spotlight.
+    await step(2, 'เลือกแพลนที่ทำไหว');
+    await page.getByRole('button', { name: '3 วัน (เริ่มต้น)' }).tap();
+    await next();
+
+    // 3: check in for today.
+    await step(3, 'ซ้อมเสร็จ เช็กชื่อวันนี้');
+    await page.getByRole('button', { name: 'เช็กชื่อวันพุธ' }).tap();
+    await next();
+
+    // 4: short on time, so the quick programme.
+    await step(4, 'เวลาน้อยก็ยังซ้อมได้');
+    await page.locator('#tab-quick_busy').tap();
+    await next();
+
+    // 5: finish an exercise.
+    await step(5, 'ทำท่าไหนเสร็จ กดเช็กไว้');
     await doneButton(page.locator('#exerciseList > div').first()).tap();
     await expect(page.locator('#completedExercisesCount')).toHaveText('1');
-    await page.locator('#tourNext').tap();
+    await next();
 
-    // Step 3: check in for today.
-    await page.getByRole('button', { name: 'เช็กชื่อวันพุธ' }).tap();
-    await page.locator('#tourNext').tap();
+    // 6: a 30-second rest.
+    await step(6, 'ตัวช่วยระหว่างซ้อม');
+    await page.getByRole('button', { name: '30 วิ', exact: true }).tap();
+    await expect(page.locator('#timerDisplay')).toHaveText(/^00:(30|2\d)$/);
+    await page.getByRole('button', { name: 'รีเซต' }).tap();
+    await next();
 
-    // Step 4: back up, then start using the app.
+    // 7: the check-in shows up in the stats.
+    await step(7, 'ดูความสม่ำเสมอของตัวเอง');
     await expect(page).toHaveURL(/#progress$/);
     await expect(page.locator('#statWeek')).toContainText('1 / 3');
+    await next();
+
+    // 8: first measurement.
+    await step(8, 'วัดสัดส่วนสัปดาห์ละครั้ง');
+    await logMeasurement(page, { weight: 50, waist: 66, hip: 90, note: 'เริ่มต้น' });
+    await expect(page.locator('#measureRows tr')).toHaveCount(1);
+    await next();
+
+    // 9: back up.
+    await step(9, 'ข้อมูลอยู่ในเครื่องนี้เท่านั้น');
     const [download] = await Promise.all([page.waitForEvent('download'), page.locator('#exportJsonBtn').tap()]);
     expect(download.suggestedFilename()).toMatch(/^hourglass-backup-/);
-    await page.locator('#tourNext').tap();
+    await next();
+
+    // 10: protein target for her own weight.
+    await step(10, 'โปรตีนต่อวันของคุณ');
+    await expect(page).toHaveURL(/#nutrition$/);
+    await page.locator('#proteinWeight').fill('55');
+    await expect(page.locator('#proteinResult')).toHaveText('88 กรัม');
+    await next();
+
+    // 11: where the theme and the replay live; then start using the app.
+    await step(11, 'ปรับให้เข้ากับคุณ');
+    await expect(page.locator('#tourNext')).toHaveText('เริ่มใช้งาน');
+    await next();
     await expect(page.locator('#tour')).toBeHidden();
+    await expect(page).toHaveURL(/#workout$/);
 
     // Coming back later: no tour, everything kept.
     await page.reload();

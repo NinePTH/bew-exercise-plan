@@ -12,7 +12,7 @@ A personal workout planner for building an hourglass shape on an inverted-triang
 | ความคืบหน้า (Progress) | Check-in stats (this week, 3+-day weekly streak, 8-week grid), the last 7 days of exercises, and a body-measurement tracker with trend charts and a weekly reminder |
 | โภชนาการ & เทคนิค (Nutrition) | Protein calculator (1.2–1.5 g/kg), food guidance, a sample one-day meal plan, and body-type do's and don'ts |
 
-New visitors get a 4-step welcome tour that spotlights the real controls (pick a plan, tick exercises, check in, back up); it shows once, and **วิธีใช้** in the header replays it.
+New visitors get an 11-step welcome tour that spotlights the real controls on every tab: the tabs, plan, check-in, programmes by time, ticking exercises, the timer and vacuum coach, check-in stats, measurements and the calendar reminder, backup, the protein calculator, and the theme. It shows once. **วิธีใช้** in the header replays it, starting with the tab you're on (Back reaches the rest), and closing it puts you back where you were. The spotlight glides to each target while the page scrolls under it, and the card fades in once everything has settled; with reduced motion it jumps instead.
 
 It can be installed to a phone's home screen and works offline after the first visit. It has a light and a dark theme; the button in the header switches between following the device, light, and dark.
 

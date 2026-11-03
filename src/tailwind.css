@@ -109,26 +109,32 @@ body {
     border-radius: 9999px;
 }
 
-/* First-run tour. The spotlight is a hole cut by a huge shadow; it glides between steps
-   (ease-out expo) and follows instantly while the page scrolls (.tour-still). */
+/* First-run tour. The spotlight is a hole cut by a huge shadow. JS moves it every frame
+   (transform + size, eased toward the target's live position), so CSS only fades the dim in and out.
+   The card hides instantly while anything moves, then rises in once the page has settled. */
 .tour-spot {
     position: fixed;
+    top: 0;
+    left: 0;
     border-radius: 14px;
     box-shadow: 0 0 0 200vmax var(--tour-dim);
     outline: 2px solid rgb(var(--c-rose-400));
     outline-offset: 0;
-    transition: top .45s cubic-bezier(.16, 1, .3, 1), left .45s cubic-bezier(.16, 1, .3, 1),
-        width .45s cubic-bezier(.16, 1, .3, 1), height .45s cubic-bezier(.16, 1, .3, 1), opacity .2s;
+    will-change: transform;
+    transition: opacity .22s ease-out;
 }
 .tour-card {
-    transition: top .45s cubic-bezier(.16, 1, .3, 1), left .45s cubic-bezier(.16, 1, .3, 1);
+    transition: opacity .24s cubic-bezier(.16, 1, .3, 1), transform .32s cubic-bezier(.16, 1, .3, 1);
 }
-.tour-still .tour-spot,
-.tour-still .tour-card {
+.tour-card-hidden {
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
     transition: none;
 }
 @media (prefers-reduced-motion: reduce) {
-    .tour-spot, .tour-card { transition: none; }
+    .tour-card { transition: opacity .15s linear; }
+    .tour-card-hidden { transform: none; transition: none; }
 }
 
 /* Keyboard focus that reads on both themes. */
