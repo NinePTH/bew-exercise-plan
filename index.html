@@ -24,35 +24,35 @@
 <body class="min-h-screen pb-28 md:pb-16">
 
     <!-- Header / Profile Banner -->
-    <header class="keep-light bg-gradient-to-r from-rose-500 via-pink-500 to-amber-500 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
+    <header class="keep-light bg-gradient-to-r from-rose-600 via-pink-600 to-amber-700 text-white pt-8 pb-14 px-4 sm:px-6 shadow-md relative overflow-hidden">
         <div class="max-w-5xl mx-auto relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <div class="flex items-center gap-2 mb-2">
-                    <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">
+                    <div class="inline-flex items-center gap-2 bg-black/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium">
                         <i class="ph-fill ph-sparkle text-amber-200"></i>
                         <span>Inverted Triangle Body Balance</span>
                     </div>
                     <!-- Theme: follows the device (auto) → light → dark -->
-                    <button id="themeBtn" type="button" onclick="cycleTheme()" class="inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium transition">
+                    <button id="themeBtn" type="button" onclick="cycleTheme()" class="inline-flex items-center gap-1.5 bg-black/15 hover:bg-black/25 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium transition">
                         <i id="themeIcon" class="ph-fill ph-circle-half"></i><span id="themeLabel">อัตโนมัติ</span>
                     </button>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Hourglass & Core Sculpt</h1>
-                <p class="text-rose-100 text-sm mt-1">แผนปั้นสะโพก กระชับเอวคอด และเฟิร์มไหล่สวย (สำหรับทำที่ห้องพัก & สวน)</p>
+                <p class="text-white text-sm mt-1">แผนปั้นสะโพก กระชับเอวคอด และเฟิร์มไหล่สวย (สำหรับทำที่ห้องพัก & สวน)</p>
             </div>
             
             <!-- User Stats Badges -->
-            <div class="flex flex-wrap gap-2 sm:gap-3 bg-white/15 backdrop-blur-md p-3 rounded-2xl border border-white/20 text-xs sm:text-sm">
+            <div class="flex flex-wrap gap-2 sm:gap-3 p-3 rounded-2xl border border-white/35 text-xs sm:text-sm">
                 <div class="px-2.5 py-1 border-r border-white/20">
-                    <span class="block text-rose-100 text-[11px]">ส่วนสูง / น้ำหนัก</span>
+                    <span class="block text-white text-xs">ส่วนสูง / น้ำหนัก</span>
                     <span class="font-semibold">152 ซม. / 50 กก.</span>
                 </div>
                 <div class="px-2.5 py-1 border-r border-white/20">
-                    <span class="block text-rose-100 text-[11px]">เป้าหมาย</span>
+                    <span class="block text-white text-xs">เป้าหมาย</span>
                     <span class="font-semibold">เอวคอด + ปั้นก้น + ไหล่เฟิร์ม</span>
                 </div>
                 <div class="px-2.5 py-1">
-                    <span class="block text-rose-100 text-[11px]">ความถี่</span>
+                    <span class="block text-white text-xs">ความถี่</span>
                     <span class="font-semibold">ยืดหยุ่น 3–5 วัน/สัปดาห์</span>
                 </div>
             </div>
@@ -85,14 +85,14 @@
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-3">
                     <div>
                         <h2 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="ph-fill ph-calendar-check text-rose-500 text-xl"></i>
+                            <i class="ph-fill ph-calendar-check text-rose-600 text-xl"></i>
                             ตารางแนะนำประจำสัปดาห์ (จันทร์ – อาทิตย์)
                         </h2>
                         <p class="text-xs text-gray-500">เลือกจำนวนวันที่คุณสะดวกในสัปดาห์นี้ แล้วคลิกที่วันเพื่อดูท่าฝึกหรือเช็กชื่อ</p>
                     </div>
                     <!-- Plan Frequency Selector -->
                     <div class="flex items-center gap-1 bg-rose-50 p-1 rounded-xl border border-rose-100 self-start">
-                        <button onclick="setWeeklyPlan(3)" id="planBtn-3" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-rose-500 text-white shadow-sm">3 วัน (เริ่มต้น)</button>
+                        <button onclick="setWeeklyPlan(3)" id="planBtn-3" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-brand text-white shadow-sm">3 วัน (เริ่มต้น)</button>
                         <button onclick="setWeeklyPlan(4)" id="planBtn-4" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100">4 วัน (สมดุล)</button>
                         <button onclick="setWeeklyPlan(5)" id="planBtn-5" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100">5 วัน (ฟิตจัดเต็ม)</button>
                     </div>
@@ -113,7 +113,7 @@
             <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between bg-gradient-to-br from-surface to-rose-50/50">
                 <div>
                     <h2 class="font-bold text-gray-800 flex items-center gap-2 mb-2">
-                        <i class="ph-fill ph-barbell text-rose-500 text-xl"></i>
+                        <i class="ph-fill ph-barbell text-rose-600 text-xl"></i>
                         อุปกรณ์พร้อมลุยในห้องพัก
                     </h2>
                     <div class="flex flex-wrap gap-1.5 mb-3">
@@ -148,15 +148,15 @@
                 <button onclick="switchTab('lower_sculpt')" id="tab-lower_sculpt" class="active-tab flex flex-col items-start p-3 rounded-xl text-left transition-all">
                     <div class="flex items-center justify-between w-full mb-1">
                         <i class="ph-fill ph-fire text-lg"></i>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/20">35–40 น.</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-black/15">35–40 น.</span>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm">ปั้นสะโพกผาย & ขาเรียว</span>
                 </button>
 
                 <button onclick="switchTab('waist_shoulder')" id="tab-waist_shoulder" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
                     <div class="flex items-center justify-between w-full mb-1">
-                        <i class="ph-fill ph-spiral text-lg text-rose-500"></i>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–35 น.</span>
+                        <i class="ph-fill ph-spiral text-lg text-rose-600"></i>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–35 น.</span>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm">เอวคอด & ไหล่เฟิร์ม</span>
                 </button>
@@ -164,7 +164,7 @@
                 <button onclick="switchTab('quick_busy')" id="tab-quick_busy" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
                     <div class="flex items-center justify-between w-full mb-1">
                         <i class="ph-fill ph-lightning text-lg text-amber-500"></i>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">15–20 น.</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-medium">15–20 น.</span>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm">โหมดวันยุ่ง (Quick)</span>
                 </button>
@@ -172,7 +172,7 @@
                 <button onclick="switchTab('cardio_burn')" id="tab-cardio_burn" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all">
                     <div class="flex items-center justify-between w-full mb-1">
                         <i class="ph-fill ph-sneaker-move text-lg text-emerald-500"></i>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–40 น.</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">30–40 น.</span>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm">คาร์ดิโอรีดไขมัน</span>
                 </button>
@@ -180,7 +180,7 @@
                 <button onclick="switchTab('stretching')" id="tab-stretching" class="bg-gray-100 hover:bg-rose-50 text-gray-700 flex flex-col items-start p-3 rounded-xl text-left transition-all col-span-2 md:col-span-1">
                     <div class="flex items-center justify-between w-full mb-1">
                         <i class="ph-fill ph-heart-straight text-lg text-indigo-500"></i>
-                        <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-medium">5–10 น.</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-medium">5–10 น.</span>
                     </div>
                     <span class="font-semibold text-xs sm:text-sm">ยืดเหยียดลดปวดเมื่อย</span>
                 </button>
@@ -205,17 +205,17 @@
                 <div>
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                            <i class="ph-fill ph-timer text-rose-500 text-xl"></i>
+                            <i class="ph-fill ph-timer text-rose-600 text-xl"></i>
                             นาฬิกาจับเวลาพักเซต / แพลงก์
                         </h3>
-                        <span class="text-xs text-gray-400">คลิกเลือกเวลาเพื่อเริ่มทันที</span>
+                        <span class="text-xs text-gray-500">คลิกเลือกเวลาเพื่อเริ่มทันที</span>
                     </div>
                     <p class="text-xs text-gray-500 mb-4">ช่วยให้การพักระหว่างเซตแม่นยำและคุมเวลาออกกำลังกายได้ตามเป้า</p>
                 </div>
 
                 <div class="flex flex-col items-center justify-center py-4 bg-gray-50 rounded-2xl border border-gray-100 mb-4">
                     <div id="timerDisplay" class="text-5xl font-bold text-gray-800 tracking-wider font-mono">00:45</div>
-                    <div id="timerStatus" class="text-xs text-rose-500 font-medium mt-1">พร้อมเริ่มจับเวลา</div>
+                    <div id="timerStatus" class="text-xs text-rose-600 font-medium mt-1">พร้อมเริ่มจับเวลา</div>
                 </div>
 
                 <div class="grid grid-cols-4 gap-2 mb-3">
@@ -226,7 +226,7 @@
                 </div>
 
                 <div class="flex gap-2">
-                    <button id="startPauseBtn" onclick="toggleTimer()" class="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <button id="startPauseBtn" onclick="toggleTimer()" class="flex-1 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm">
                         <i class="ph-fill ph-play"></i> เริ่มจับเวลา
                     </button>
                     <button onclick="resetTimer()" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl font-medium text-sm transition">
@@ -257,7 +257,7 @@
                     </p>
                 </div>
 
-                <button id="vacuumBtn" onclick="startVacuumSession()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-2 shadow-sm">
+                <button id="vacuumBtn" onclick="startVacuumSession()" class="w-full py-2.5 bg-gradient-to-r from-brand-amber to-brand hover:from-brand-amber-dark hover:to-brand-dark text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-2 shadow-sm">
                     <i class="ph-fill ph-play-circle text-lg"></i> เริ่มฝึกแขม่วหน้าท้อง 1 เซต (25 วินาที)
                 </button>
             </div>
@@ -266,7 +266,7 @@
         <!-- Body Type Strategy Guide (Do's & Don'ts) -->
         <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden>
             <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <i class="ph-fill ph-compass text-rose-500 text-xl"></i>
+                <i class="ph-fill ph-compass text-rose-600 text-xl"></i>
                 สรุปเทคนิคปั้นหุ่นสำหรับรูปร่างสามเหลี่ยมคว่ำ (สูง 152 ซม. / 50 กก.)
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -315,7 +315,7 @@
         <!-- Check-in history -->
         <section data-panel="progress" class="glass-card rounded-2xl p-5 shadow-sm" id="checkinSection" hidden>
             <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-1">
-                <i class="ph-fill ph-calendar-check text-rose-500 text-xl"></i>
+                <i class="ph-fill ph-calendar-check text-rose-600 text-xl"></i>
                 สถิติการเช็กชื่อออกกำลังกาย
             </h3>
             <p class="text-xs text-gray-500 mb-3">เช็กชื่อได้ที่ตารางประจำสัปดาห์ในแท็บออกกำลังกาย ระบบจะเก็บประวัติให้อัตโนมัติ</p>
@@ -326,10 +326,10 @@
         <section data-panel="progress" class="glass-card rounded-2xl p-5 shadow-sm" id="measureSection" hidden>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1">
                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                    <i class="ph-fill ph-ruler text-rose-500 text-xl"></i>
+                    <i class="ph-fill ph-ruler text-rose-600 text-xl"></i>
                     บันทึกและติดตามสัดส่วน (Body Measurement Tracker)
                 </h3>
-                <span class="text-[11px] text-gray-500 flex items-center gap-1"><i class="ph-fill ph-device-mobile"></i> ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น</span>
+                <span class="text-xs text-gray-500 flex items-center gap-1"><i class="ph-fill ph-device-mobile"></i> ข้อมูลบันทึกในเบราว์เซอร์เครื่องนี้เท่านั้น</span>
             </div>
             <p class="text-xs text-gray-500 mb-4">เป้าหมาย: ลดรอบเอวเล็กน้อยให้คอด และรักษา/เพิ่มความกระชับของสะโพก เพื่อสร้างสัดส่วนนาฬิกาทราย (น้ำหนัก 50 กก. ถือว่าดีแล้ว เน้นเปลี่ยนไขมันเป็นกล้ามเนื้อ หรือ Body Recomposition)</p>
 
@@ -342,7 +342,7 @@
             <!-- Weekly reminder: a repeating calendar event (works with the app closed) -->
             <div class="mb-5 text-xs text-gray-600">
                 <div class="flex flex-wrap items-center gap-2">
-                    <i class="ph-fill ph-bell-ringing text-rose-500 text-base"></i>
+                    <i class="ph-fill ph-bell-ringing text-rose-600 text-base"></i>
                     <label for="remDay">เตือนวัดสัดส่วนทุกวัน</label>
                     <select id="remDay" onchange="saveReminderSettings()" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                         <option value="0">จันทร์</option><option value="1">อังคาร</option><option value="2">พุธ</option>
@@ -354,8 +354,8 @@
                         <i class="ph-bold ph-calendar-plus"></i> เพิ่มลงปฏิทิน (.ics)
                     </button>
                 </div>
-                <p class="text-[11px] text-gray-500 mt-1.5">เปิดไฟล์ที่ได้ด้วยแอปปฏิทินในมือถือ ปฏิทินจะแจ้งเตือนทุกสัปดาห์แม้ไม่ได้เปิดแอปนี้ · ในแอปจะขึ้นเตือนเองเมื่อไม่ได้วัดเกิน 7 วัน</p>
-                <p id="reminderMsg" role="status" aria-live="polite" class="text-[11px] text-emerald-700 mt-1 min-h-[1rem]"></p>
+                <p class="text-xs text-gray-500 mt-1.5">เปิดไฟล์ที่ได้ด้วยแอปปฏิทินในมือถือ ปฏิทินจะแจ้งเตือนทุกสัปดาห์แม้ไม่ได้เปิดแอปนี้ · ในแอปจะขึ้นเตือนเองเมื่อไม่ได้วัดเกิน 7 วัน</p>
+                <p id="reminderMsg" role="status" aria-live="polite" class="text-xs text-emerald-700 mt-1 min-h-[1rem]"></p>
             </div>
 
             <form id="measureForm" class="grid grid-cols-2 md:grid-cols-6 gap-2 mb-4 items-end text-xs" onsubmit="addMeasurement(event)">
@@ -374,7 +374,7 @@
                 <label class="flex flex-col gap-1 col-span-2 md:col-span-1">หมายเหตุ / ความรู้สึก
                     <input id="mNote" type="text" maxlength="120" placeholder="เช่น เริ่มต้นโปรแกรม" class="border border-gray-200 rounded-lg px-2 py-1.5 bg-surface">
                 </label>
-                <button type="submit" class="col-span-2 md:col-span-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg font-semibold transition">บันทึก</button>
+                <button type="submit" class="col-span-2 md:col-span-1 py-2 bg-brand hover:bg-brand-dark text-white rounded-lg font-semibold transition">บันทึก</button>
             </form>
             <p id="measureError" class="text-xs text-rose-600 mb-3 hidden"></p>
 
@@ -406,7 +406,7 @@
                 <input type="file" id="importFile" accept=".json,.csv,application/json,text/csv" class="hidden" onchange="importMeasurementsFile(this)">
             </div>
             <p id="backupMsg" role="status" aria-live="polite" class="text-xs text-gray-600 mt-2 min-h-[1rem]"></p>
-            <p class="text-[11px] text-gray-500 mt-1">ย้ายเครื่องหรือเปลี่ยนมือถือ: กด "สำรองข้อมูล" แล้วเปิดหน้านี้บนเครื่องใหม่ กด "นำเข้าข้อมูล" เลือกไฟล์ที่ได้</p>
+            <p class="text-xs text-gray-500 mt-1">ย้ายเครื่องหรือเปลี่ยนมือถือ: กด "สำรองข้อมูล" แล้วเปิดหน้านี้บนเครื่องใหม่ กด "นำเข้าข้อมูล" เลือกไฟล์ที่ได้</p>
         </section>
 
         <!-- Nutrition & Protein Guide -->
@@ -426,7 +426,7 @@
                         กก.
                     </label>
                     <div class="mb-3">
-                        <div class="text-[11px] text-gray-500">เป้าหมายโปรตีนต่อวัน</div>
+                        <div class="text-xs text-gray-500">เป้าหมายโปรตีนต่อวัน</div>
                         <div id="proteinResult" class="text-3xl font-bold text-amber-700">60 – 75 กรัม</div>
                     </div>
                     <p class="text-amber-900"><strong>แหล่งโปรตีนหาซื้อง่าย:</strong> อกไก่, ไข่ต้ม (ไข่ขาว + ไข่แดง), ปลาทูน่าในน้ำแร่, เต้าหู้, นมถั่วเหลือง หรือเวย์โปรตีน 1 สคูป (ประมาณ 20–25 กรัม)</p>
@@ -455,7 +455,7 @@
         <!-- Sample Meal Plan -->
         <section data-panel="nutrition" class="glass-card rounded-2xl p-5 shadow-sm" hidden id="mealPlanSection">
             <h3 class="font-bold text-gray-800 mb-1 flex items-center gap-2">
-                <i class="ph-fill ph-cooking-pot text-rose-500 text-xl"></i>
+                <i class="ph-fill ph-cooking-pot text-rose-600 text-xl"></i>
                 เมนูตัวอย่าง 1 วัน (ทำกินเองง่ายๆ ในห้องพัก)
             </h3>
             <p class="text-xs text-gray-500 mb-4">ตัวอย่างสำหรับน้ำหนักราว 50 กก. ปริมาณโปรตีนเป็นค่าประมาณ ขึ้นกับยี่ห้อและปริมาณจริง ปรับตามเป้าหมายในเครื่องคิดเลขด้านบน และไม่ใช่คำแนะนำทางการแพทย์</p>
@@ -511,39 +511,39 @@
                 name: "แพลน 3 วัน/สัปดาห์ (เหมาะกับช่วง 1–2 สัปดาห์แรกที่เพิ่งกลับมาออกกำลังกาย)",
                 rule: "เน้นเล่นวันเว้นวัน เพื่อให้กล้ามเนื้อสะโพกและต้นขามีเวลาซ่อมแซมและเติบโต",
                 days: [
-                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา', icon: 'ph-fire', color: 'text-rose-500' },
-                    { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา', icon: 'ph-fire', color: 'text-rose-600' },
+                    { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-500' },
                     { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
-                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-400' },
-                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-500' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-600' },
                     { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'cardio_burn', label: 'วิ่งสวน / เดินชัน (เสริม)', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
-                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-500' }
                 ]
             },
             4: {
                 name: "แพลน 4 วัน/สัปดาห์ (สมดุลที่สุดสำหรับปรับหุ่นสามเหลี่ยมคว่ำให้เป็นนาฬิกาทราย)",
                 rule: "ปั้นสะโพก 2 วัน + เอวและไหล่ 1 วัน + คาร์ดิโอรีดไขมัน 1 วัน",
                 days: [
-                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-600' },
                     { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
-                    { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
-                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
-                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-400' },
+                    { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-500' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-600' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'rest', label: 'พักผ่อนกล้ามเนื้อ', icon: 'ph-moon-stars', color: 'text-gray-500' },
                     { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'cardio_burn', label: 'วิ่งสวน / เดินชันลู่วิ่ง', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
-                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-500' }
                 ]
             },
             5: {
                 name: "แพลน 5 วัน/สัปดาห์ (สำหรับสัปดาห์ที่มีเวลาว่างและร่างกายฟื้นตัวไว)",
                 rule: "ผสมวันจัดเต็มกับโหมดด่วน 15 นาที เพื่อกระตุ้นระบบเผาผลาญต่อเนื่องโดยไม่ล้าเกินไป",
                 days: [
-                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'mon', name: 'จันทร์', short: 'จ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ขา (หลัก)', icon: 'ph-fire', color: 'text-rose-600' },
                     { id: 'tue', name: 'อังคาร', short: 'อ.', mode: 'waist_shoulder', label: 'เอวคอด & ไหล่เฟิร์ม', icon: 'ph-spiral', color: 'text-pink-500' },
                     { id: 'wed', name: 'พุธ', short: 'พ.', mode: 'cardio_burn', label: 'วิ่งสวน / คาร์ดิโอ', icon: 'ph-sneaker-move', color: 'text-emerald-500' },
-                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-400' },
-                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-500' },
+                    { id: 'thu', name: 'พฤหัสบดี', short: 'พฤ.', mode: 'rest', label: 'พัก / แขม่วท้องเช้า', icon: 'ph-coffee', color: 'text-gray-500' },
+                    { id: 'fri', name: 'ศุกร์', short: 'ศ.', mode: 'lower_sculpt', label: 'ปั้นสะโพก & ก้น (รอบ 2)', icon: 'ph-fire', color: 'text-rose-600' },
                     { id: 'sat', name: 'เสาร์', short: 'ส.', mode: 'quick_busy', label: 'โหมดด่วน 15 นาที', icon: 'ph-lightning', color: 'text-amber-500' },
-                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-400' }
+                    { id: 'sun', name: 'อาทิตย์', short: 'อา.', mode: 'rest', label: 'พักผ่อนเต็มที่', icon: 'ph-sun-horizon', color: 'text-gray-500' }
                 ]
             }
         };
@@ -759,7 +759,7 @@
             [3, 4, 5].forEach(num => {
                 const btn = document.getElementById(`planBtn-${num}`);
                 if (num === freq) {
-                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-rose-500 text-white shadow-sm";
+                    btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition bg-brand text-white shadow-sm";
                 } else {
                     btn.className = "px-2.5 py-1 rounded-lg text-xs font-semibold transition text-rose-700 hover:bg-rose-100";
                 }
@@ -799,16 +799,16 @@
                             title="${isFuture ? 'ยังไม่ถึงวันนี้ เช็กชื่อได้เมื่อถึงวัน' : 'คลิกเพื่อเช็กชื่อว่าทำเสร็จแล้ว'}"
                             aria-label="เช็กชื่อวัน${day.name}" aria-pressed="${isChecked}"
                             class="w-5 h-5 rounded-full flex items-center justify-center transition ${
-                            isChecked ? 'bg-emerald-500 text-white shadow-sm' : (isFuture ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-gray-100 hover:bg-rose-100 text-gray-400')
+                            isChecked ? 'bg-emerald-500 text-white shadow-sm' : (isFuture ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-gray-100 hover:bg-rose-100 text-gray-500')
                         }">
-                            <i class="ph-bold ph-check text-[10px]"></i>
+                            <i class="ph-bold ph-check text-xs"></i>
                         </button>
                     </div>
                     <div class="my-1">
                         <i class="ph-fill ${day.icon} ${day.color} text-base"></i>
-                        <p class="text-[11px] font-semibold text-gray-800 leading-tight mt-0.5">${day.label}</p>
+                        <p class="text-xs font-semibold text-gray-800 leading-tight mt-0.5">${day.label}</p>
                     </div>
-                    <span class="text-[10px] ${day.mode === 'rest' ? 'text-gray-400' : 'text-rose-500 font-medium'}">
+                    <span class="text-xs ${day.mode === 'rest' ? 'text-gray-500' : 'text-rose-600 font-medium'}">
                         ${isChecked ? '✓ เช็กชื่อแล้ว' : (day.mode === 'rest' ? 'วันพัก' : 'คลิกดูท่าฝึก')}
                     </span>
                 `;
@@ -850,14 +850,14 @@
                         <span class="font-bold text-gray-800"><i class="ph-fill ph-sparkle text-amber-500"></i> วัน${day.name}: วันพักฟื้นฟูกล้ามเนื้อ (Active Recovery)</span>
                         <p class="text-gray-600 mt-0.5">วันนี้ไม่ต้องเวทหนัก! แนะนำให้ฝึกแค่ <strong>Stomach Vacuum (แขม่วหน้าท้อง) 3 รอบตอนเช้า</strong> และเดินเล่นยืดเหยียดเบาๆ เพื่อให้กล้ามเนื้อก้นและต้นขาซ่อมแซมตัวเอง</p>
                     </div>
-                    <button onclick="document.getElementById('vacuumBtn').scrollIntoView({behavior: 'smooth'})" class="px-3 py-1.5 bg-amber-500 text-white rounded-lg font-medium shrink-0 hover:bg-amber-600 transition">
+                    <button onclick="document.getElementById('vacuumBtn').scrollIntoView({behavior: 'smooth'})" class="px-3 py-1.5 bg-brand-amber text-white rounded-lg font-medium shrink-0 hover:bg-brand-amber-dark transition">
                         ไปที่ตัวช่วยฝึกแขม่วท้อง
                     </button>
                 `;
             } else {
                 banner.innerHTML = `
                     <div>
-                        <span class="font-bold text-rose-900"><i class="ph-fill ph-calendar-star text-rose-500"></i> แผนของวัน${day.name}: ${day.label}</span>
+                        <span class="font-bold text-rose-900"><i class="ph-fill ph-calendar-star text-rose-600"></i> แผนของวัน${day.name}: ${day.label}</span>
                         <p class="text-rose-700 mt-0.5">${plan.rule} — <em>หากวันนี้ยุ่งหรือเหนื่อย สามารถสลับไปกดแท็บ <strong>"โหมดวันยุ่ง (15–20 นาที)"</strong> แทนได้เลย!</em></p>
                     </div>
                     <button onclick="switchTab('quick_busy')" class="px-3 py-1.5 bg-surface border border-rose-200 text-rose-600 rounded-lg font-semibold shrink-0 hover:bg-rose-100 transition">
@@ -910,16 +910,16 @@
                 card.innerHTML = `
                     <div>
                         <div class="flex items-start justify-between gap-2 mb-2">
-                            <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 border border-rose-100">
+                            <span class="text-xs font-medium px-2.5 py-0.5 rounded-md bg-rose-50 text-rose-600 border border-rose-100">
                                 ${ex.equipment}
                             </span>
-                            <button onclick="setTimer(${ex.rest})" class="text-[11px] text-gray-500 hover:text-rose-600 flex items-center gap-1 bg-gray-100 hover:bg-rose-50 px-2 py-0.5 rounded-md transition" title="ตั้งเวลาพัก">
+                            <button onclick="setTimer(${ex.rest})" class="text-xs text-gray-500 hover:text-rose-600 flex items-center gap-1 bg-gray-100 hover:bg-rose-50 px-2 py-0.5 rounded-md transition" title="ตั้งเวลาพัก">
                                 <i class="ph-bold ph-timer"></i> พัก ${ex.rest} วิ
                             </button>
                         </div>
 
-                        <h4 class="font-bold text-gray-800 text-base mb-1 ${ex.done ? 'line-through text-gray-400' : ''}">${ex.name}</h4>
-                        <div class="text-xs font-semibold text-rose-500 mb-3">${ex.sets}</div>
+                        <h4 class="font-bold text-gray-800 text-base mb-1 ${ex.done ? 'line-through text-gray-500' : ''}">${ex.name}</h4>
+                        <div class="text-xs font-semibold text-rose-600 mb-3">${ex.sets}</div>
 
                         <p class="text-xs text-gray-600 leading-relaxed mb-3">
                             ${ex.steps}
@@ -927,7 +927,7 @@
                     </div>
 
                     <div>
-                        <div class="bg-amber-50/70 border border-amber-200/70 rounded-xl p-2.5 text-[11px] text-amber-900 mb-3">
+                        <div class="bg-amber-50/70 border border-amber-200/70 rounded-xl p-2.5 text-xs text-amber-900 mb-3">
                             <strong class="block text-amber-800 mb-0.5"><i class="ph-fill ph-lightbulb"></i> เคล็ดลับหุ่นสวย:</strong>
                             ${ex.tip}
                         </div>
@@ -935,7 +935,7 @@
                         <button onclick="toggleExerciseDone('${ex.id}')" class="w-full py-2 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 ${
                             ex.done 
                             ? 'bg-emerald-500 text-white shadow-sm' 
-                            : 'bg-gray-100 hover:bg-rose-500 hover:text-white text-gray-700'
+                            : 'bg-gray-100 hover:bg-brand hover:text-white text-gray-700'
                         }">
                             <i class="ph-bold ${ex.done ? 'ph-check-circle' : 'ph-circle'} text-sm"></i>
                             ${ex.done ? 'ทำท่านี้เสร็จแล้ว!' : 'ทำเสร็จแล้ว คลิกเช็กชื่อ'}
@@ -1023,10 +1023,10 @@
             const btn = document.getElementById('startPauseBtn');
             if (isTimerRunning) {
                 btn.innerHTML = `<i class="ph-fill ph-pause"></i> หยุดชั่วคราว`;
-                btn.className = "flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
+                btn.className = "flex-1 py-2.5 bg-brand-amber hover:bg-brand-amber-dark text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
             } else {
                 btn.innerHTML = `<i class="ph-fill ph-play"></i> เริ่มจับเวลา`;
-                btn.className = "flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
+                btn.className = "flex-1 py-2.5 bg-brand hover:bg-brand-dark text-white rounded-xl font-medium text-sm transition flex items-center justify-center gap-1.5 shadow-sm";
             }
         }
 
@@ -1255,7 +1255,7 @@
             const dayShort = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
             let grid = '<div class="grid gap-1" style="grid-template-columns: auto repeat(' + HISTORY_WEEKS + ', minmax(0, 1fr));">';
             DAY_IDS.forEach((_, row) => {
-                grid += `<span class="text-[10px] text-gray-500 pr-1 leading-4">${dayShort[row]}</span>`;
+                grid += `<span class="text-xs text-gray-500 pr-1 leading-4">${dayShort[row]}</span>`;
                 weeks.forEach(dates => {
                     const d = dates[row];
                     const done = checkinDates.has(d), future = d > today;
@@ -1286,16 +1286,16 @@
 
             el.innerHTML = `
                 <div class="grid grid-cols-3 gap-x-4 mb-4 py-3 border-y border-rose-100">
-                    <div><div class="text-[11px] text-gray-500">สัปดาห์นี้</div>
-                        <div class="text-base font-bold text-gray-800" id="statWeek">${thisWeek} / ${currentPlanFreq} <span class="text-[11px] font-normal text-gray-500">วัน</span></div></div>
-                    <div><div class="text-[11px] text-gray-500">สัปดาห์ติดต่อกัน (≥ ${STREAK_MIN_DAYS} วัน)</div>
-                        <div class="text-base font-bold text-gray-800" id="statStreak">${streak} <span class="text-[11px] font-normal text-gray-500">สัปดาห์</span></div></div>
-                    <div><div class="text-[11px] text-gray-500">เช็กชื่อทั้งหมด</div>
-                        <div class="text-base font-bold text-gray-800" id="statTotal">${checkinDates.size} <span class="text-[11px] font-normal text-gray-500">วัน</span></div></div>
+                    <div><div class="text-xs text-gray-500">สัปดาห์นี้</div>
+                        <div class="text-base font-bold text-gray-800" id="statWeek">${thisWeek} / ${currentPlanFreq} <span class="text-xs font-normal text-gray-500">วัน</span></div></div>
+                    <div><div class="text-xs text-gray-500">สัปดาห์ติดต่อกัน (≥ ${STREAK_MIN_DAYS} วัน)</div>
+                        <div class="text-base font-bold text-gray-800" id="statStreak">${streak} <span class="text-xs font-normal text-gray-500">สัปดาห์</span></div></div>
+                    <div><div class="text-xs text-gray-500">เช็กชื่อทั้งหมด</div>
+                        <div class="text-base font-bold text-gray-800" id="statTotal">${checkinDates.size} <span class="text-xs font-normal text-gray-500">วัน</span></div></div>
                 </div>
-                <div class="text-[11px] text-gray-500 mb-1.5">${HISTORY_WEEKS} สัปดาห์ล่าสุด (ซ้าย → ขวา = เก่า → ใหม่)</div>
+                <div class="text-xs text-gray-500 mb-1.5">${HISTORY_WEEKS} สัปดาห์ล่าสุด (ซ้าย → ขวา = เก่า → ใหม่)</div>
                 <div class="max-w-md">${grid}</div>
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-[11px] text-gray-500">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-gray-500">
                     <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-rose-500"></span>เช็กชื่อแล้ว</span>
                     <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-rose-200"></span>ทำท่าฝึก (ไม่ได้เช็กชื่อ)</span>
                     <span class="flex items-center gap-1"><span class="inline-block w-3 h-3 rounded-sm bg-gray-100"></span>ไม่ได้ทำ</span>
@@ -1303,7 +1303,7 @@
                 <div class="mt-5 pt-4 border-t border-rose-100">
                     <div class="flex items-baseline justify-between mb-2">
                         <h4 class="text-xs font-semibold text-gray-700">ท่าที่ทำใน 7 วันล่าสุด</h4>
-                        <span class="text-[11px] text-gray-500">รวมทั้งหมด <strong class="text-gray-700" id="statExTotal">${exTotal}</strong> ครั้ง</span>
+                        <span class="text-xs text-gray-500">รวมทั้งหมด <strong class="text-gray-700" id="statExTotal">${exTotal}</strong> ครั้ง</span>
                     </div>
                     ${recentHtml}
                 </div>`;
@@ -1383,14 +1383,14 @@
         // judge=false for measures where neither direction is "bad" (hips: the goal is to keep or build them).
         function deltaChip(label, first, last, unit, judge = true) {
             if (first === null || last === null) {
-                return `<div><div class="text-[11px] text-gray-500">${label}</div><div class="text-base font-bold text-gray-400">–</div></div>`;
+                return `<div><div class="text-xs text-gray-500">${label}</div><div class="text-base font-bold text-gray-500">–</div></div>`;
             }
             const d = Math.round((last - first) * 10) / 10;
             const sign = d > 0 ? '+' : '';
             return `<div>
-                <div class="text-[11px] text-gray-500">${label}</div>
-                <div class="text-base font-bold text-gray-800">${fmt(last)} <span class="text-[11px] font-normal text-gray-500">${unit}</span></div>
-                <div class="text-[11px] font-semibold ${!judge ? 'text-gray-600' : (d < 0 ? 'text-emerald-600' : (d > 0 ? 'text-rose-600' : 'text-gray-500'))}">${sign}${d} ${unit} จากครั้งแรก</div>
+                <div class="text-xs text-gray-500">${label}</div>
+                <div class="text-base font-bold text-gray-800">${fmt(last)} <span class="text-xs font-normal text-gray-500">${unit}</span></div>
+                <div class="text-xs font-semibold ${!judge ? 'text-gray-600' : (d < 0 ? 'text-emerald-600' : (d > 0 ? 'text-rose-600' : 'text-gray-500'))}">${sign}${d} ${unit} จากครั้งแรก</div>
             </div>`;
         }
 
@@ -1400,7 +1400,7 @@
             const summary = document.getElementById('measureSummary');
 
             if (sorted.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-400">ยังไม่มีข้อมูล — กรอกค่าครั้งแรกด้านบนเพื่อเริ่มติดตาม</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-500">ยังไม่มีข้อมูล — กรอกค่าครั้งแรกด้านบนเพื่อเริ่มติดตาม</td></tr>`;
                 summary.innerHTML = '';
                 document.getElementById('measureCharts').innerHTML = '';
                 renderReminderBanner();
@@ -1419,7 +1419,7 @@
                     <td class="py-2 pr-2">${fmt(m.waist)}</td>
                     <td class="py-2 pr-2">${fmt(m.hip)}</td>
                     <td class="py-2 pr-2 text-gray-600">${escapeHtml(m.note || '')}</td>
-                    <td class="py-2"><button onclick="deleteMeasurement('${m.id}')" title="ลบรายการนี้" class="text-gray-400 hover:text-rose-600"><i class="ph-bold ph-trash"></i></button></td>
+                    <td class="py-2"><button onclick="deleteMeasurement('${m.id}')" title="ลบรายการนี้" class="text-gray-500 hover:text-rose-600"><i class="ph-bold ph-trash"></i></button></td>
                 </tr>`;
             });
             tbody.innerHTML = rows.reverse().join('');
@@ -1434,9 +1434,9 @@
                 deltaChip('รอบเอว', c0, c1, 'ซม.') +
                 deltaChip('รอบสะโพก', h0, h1, 'ซม.', false) +
                 `<div>
-                    <div class="text-[11px] text-gray-500">สัดส่วนเอว ÷ สะโพก</div>
+                    <div class="text-xs text-gray-500">สัดส่วนเอว ÷ สะโพก</div>
                     <div class="text-base font-bold text-gray-800">${whr ?? '–'}</div>
-                    <div class="text-[11px] text-gray-500">ยิ่งต่ำ เอวยิ่งคอดเมื่อเทียบสะโพก</div>
+                    <div class="text-xs text-gray-500">ยิ่งต่ำ เอวยิ่งคอดเมื่อเทียบสะโพก</div>
                 </div>`;
 
             renderCharts(sorted);
@@ -1533,7 +1533,7 @@
                     ${dots}
                     <text x="${(px(last) + 9).toFixed(1)}" y="${(py(last.v) + 4).toFixed(1)}" font-size="11" font-weight="600" class="c-ink">${fmt(last.v)}</text>
                 </svg>
-                <div class="chart-tip absolute pointer-events-none bg-gray-900 text-white text-[11px] rounded-md px-2 py-1 whitespace-nowrap" hidden></div>
+                <div class="chart-tip absolute pointer-events-none bg-gray-900 text-white text-xs rounded-md px-2 py-1 whitespace-nowrap" hidden></div>
                 </div>
             </figure>`;
         }
@@ -1793,9 +1793,9 @@
             try { snoozed = localStorage.getItem(SNOOZE_KEY) === localDateStr(); } catch (e) {}
             if (since === null || since < REMINDER_DUE_DAYS || snoozed) { el.innerHTML = ''; return; }
             el.innerHTML = `<div class="glass-card rounded-2xl px-4 py-3 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">`
-                + `<div class="flex items-center gap-2 text-gray-800"><i class="ph-fill ph-bell-ringing text-rose-500 text-lg"></i>`
+                + `<div class="flex items-center gap-2 text-gray-800"><i class="ph-fill ph-bell-ringing text-rose-600 text-lg"></i>`
                 + `<span><strong>ถึงเวลาวัดสัดส่วนประจำสัปดาห์</strong> · วัดครั้งล่าสุด ${since} วันก่อน</span></div>`
-                + `<div class="flex gap-2 shrink-0"><a href="#progress" class="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-semibold">ไปบันทึก</a>`
+                + `<div class="flex gap-2 shrink-0"><a href="#progress" class="px-3 py-1.5 bg-brand hover:bg-brand-dark text-white rounded-lg text-xs font-semibold">ไปบันทึก</a>`
                 + `<button type="button" onclick="snoozeReminder()" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium">ไว้พรุ่งนี้</button></div></div>`;
         }
 

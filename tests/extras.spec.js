@@ -198,7 +198,7 @@ test.describe('dark mode', () => {
         await page.goto('/index.html');
         const style = (sel, prop) => page.locator(sel).first().evaluate((el, p) => getComputedStyle(el)[p], prop);
         expect(await style('#exerciseList > div', 'backgroundColor')).toBe('rgb(27, 27, 33)'); // surface
-        expect(await style('header p', 'color')).toBe('rgb(255, 228, 230)'); // rose-100 stays light on the header
+        expect(await style('header p', 'color')).toBe('rgb(255, 255, 255)'); // header text stays white in dark mode
         expect(await style('#startPauseBtn', 'color')).toBe('rgb(255, 255, 255)');
     });
 

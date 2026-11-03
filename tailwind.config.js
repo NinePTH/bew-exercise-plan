@@ -53,7 +53,13 @@ module.exports = {
         extend: {
             colors: {
                 ...Object.fromEntries([...ACCENTS, 'gray'].map(n => [n, palette(n)])),
-                surface: 'rgb(var(--c-surface) / <alpha-value>)'
+                surface: 'rgb(var(--c-surface) / <alpha-value>)',
+                // Filled buttons with white text. Fixed (not swapped in dark mode), so white text keeps
+                // 4.5:1+ in both themes: rose-600/700 and amber-700/800.
+                brand: {
+                    DEFAULT: colors.rose['600'], dark: colors.rose['700'],
+                    amber: colors.amber['700'], 'amber-dark': colors.amber['800']
+                }
             }
         }
     },
