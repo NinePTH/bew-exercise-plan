@@ -2,10 +2,32 @@
 # Runs the tests before every push; any failure cancels the push.
 # Enable once per clone:  git config core.hooksPath .githooks
 # Skip in an emergency:   git push --no-verify
+#
+# The tests read the files in the folder, so the folder must match what is being pushed:
+# no uncommitted or untracked changes (an uncommitted fix or an un-added new file would make
+# the tests pass while the pushed commits are broken), and the pushed commit must be HEAD.
 
-echo "pre-push: running tests (about a minute)..."
+if [ -n "$(git status --porcelain)" ]; then
+    echo "pre-push: you have changes that aren't committed, so the tests wouldn't check what you're pushing."
+    git status --short
+    echo "          Commit them (or 'git stash -u'), then push again."
+    exit 1
+fi
 
-# `npm test` rebuilds styles.css first, then runs Playwright.
+head=$(git rev-parse HEAD)
+zero=0000000000000000000000000000000000000000
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ "$local_sha" = "$zero" ] && continue # deleting a remote branch: nothing to test
+    if [ "$local_sha" != "$head" ]; then
+        echo "pre-push: pushing $local_ref, which isn't the commit you have checked out."
+        echo "          Check it out first so the tests run on it: git switch ${local_ref#refs/heads/}"
+        exit 1
+    fi
+done
+
+echo "pre-push: running tests (about a minute and a half)..."
+
+# `npm test` rebuilds styles.css first, then runs unit, functional and end-to-end tests.
 if ! npm test --silent -- --reporter=line; then
     echo "pre-push: tests failed, push cancelled."
     exit 1
